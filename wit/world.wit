@@ -1,0 +1,9 @@
+package lxfontes:component;
+
+world imports {
+  include wasi:cli/imports@0.2.0;
+  include wasi:filesystem/imports@0.2.0;
+
+  export wasi:http/incoming-handler@0.2.0;
+  import wasi:http/outgoing-handler@0.2.0;
+}
