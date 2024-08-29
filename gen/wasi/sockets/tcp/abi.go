@@ -5,9 +5,9 @@
 package tcp
 
 import (
-	"github.com/lxfontes/component/gen/wasi/io/streams"
-	"github.com/lxfontes/component/gen/wasi/sockets/network"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/io/streams"
+	"go.wasmcloud.dev/component/gen/wasi/sockets/network"
 	"unsafe"
 )
 

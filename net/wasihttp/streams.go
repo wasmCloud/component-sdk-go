@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/lxfontes/component/gen/wasi/io/streams"
+	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )
 
 type inputStreamReader struct {

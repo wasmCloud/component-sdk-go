@@ -5,8 +5,8 @@
 package outgoinghandler
 
 import (
-	"github.com/lxfontes/component/gen/wasi/http/types"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
 	"unsafe"
 )
 

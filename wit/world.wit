@@ -1,4 +1,4 @@
-package lxfontes:component;
+package wasmcloud:component;
 
 world imports {
   include wasi:cli/imports@0.2.0;

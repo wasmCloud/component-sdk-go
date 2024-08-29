@@ -5,8 +5,8 @@
 package udp
 
 import (
-	"github.com/lxfontes/component/gen/wasi/sockets/network"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/sockets/network"
 	"unsafe"
 )
 

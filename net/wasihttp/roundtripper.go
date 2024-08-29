@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	outgoinghandler "github.com/lxfontes/component/gen/wasi/http/outgoing-handler"
-	"github.com/lxfontes/component/gen/wasi/http/types"
+	outgoinghandler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
 	"github.com/ydnar/wasm-tools-go/cm"
 )
 

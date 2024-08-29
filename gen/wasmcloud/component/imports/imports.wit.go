@@ -2,5 +2,5 @@
 
 //go:build !wasip1
 
-// Package imports represents the world "lxfontes:component/imports".
+// Package imports represents the world "wasmcloud:component/imports".
 package imports

@@ -9,8 +9,8 @@
 package terminalstderr
 
 import (
-	terminaloutput "github.com/lxfontes/component/gen/wasi/cli/terminal-output"
 	"github.com/ydnar/wasm-tools-go/cm"
+	terminaloutput "go.wasmcloud.dev/component/gen/wasi/cli/terminal-output"
 )
 
 // GetTerminalStderr represents the imported function "get-terminal-stderr".

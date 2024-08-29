@@ -10,11 +10,11 @@
 package types
 
 import (
-	monotonicclock "github.com/lxfontes/component/gen/wasi/clocks/monotonic-clock"
-	ioerror "github.com/lxfontes/component/gen/wasi/io/error"
-	"github.com/lxfontes/component/gen/wasi/io/poll"
-	"github.com/lxfontes/component/gen/wasi/io/streams"
 	"github.com/ydnar/wasm-tools-go/cm"
+	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
+	ioerror "go.wasmcloud.dev/component/gen/wasi/io/error"
+	"go.wasmcloud.dev/component/gen/wasi/io/poll"
+	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )
 
 // Method represents the variant "wasi:http/types@0.2.0#method".

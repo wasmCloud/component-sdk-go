@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/lxfontes/component/gen/wasi/http/types"
-	"github.com/lxfontes/component/gen/wasi/io/streams"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
+	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 	"github.com/ydnar/wasm-tools-go/cm"
 )
 

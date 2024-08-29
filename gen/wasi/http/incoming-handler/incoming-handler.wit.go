@@ -9,8 +9,8 @@
 package incominghandler
 
 import (
-	"github.com/lxfontes/component/gen/wasi/http/types"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
 
 //go:wasmexport wasi:http/incoming-handler@0.2.0#handle

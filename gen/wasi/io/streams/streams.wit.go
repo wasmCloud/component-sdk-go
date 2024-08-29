@@ -12,9 +12,9 @@
 package streams
 
 import (
-	ioerror "github.com/lxfontes/component/gen/wasi/io/error"
-	"github.com/lxfontes/component/gen/wasi/io/poll"
 	"github.com/ydnar/wasm-tools-go/cm"
+	ioerror "go.wasmcloud.dev/component/gen/wasi/io/error"
+	"go.wasmcloud.dev/component/gen/wasi/io/poll"
 )
 
 // StreamError represents the imported variant "wasi:io/streams@0.2.0#stream-error".

@@ -6,8 +6,8 @@
 package preopens
 
 import (
-	"github.com/lxfontes/component/gen/wasi/filesystem/types"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/filesystem/types"
 )
 
 // GetDirectories represents the imported function "get-directories".

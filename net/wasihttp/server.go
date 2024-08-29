@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/lxfontes/component"
-	incominghandler "github.com/lxfontes/component/gen/wasi/http/incoming-handler"
-	"github.com/lxfontes/component/gen/wasi/http/types"
+	_ "go.wasmcloud.dev/component"
+	incominghandler "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
 
 // handler is the function that will be called by the http server.

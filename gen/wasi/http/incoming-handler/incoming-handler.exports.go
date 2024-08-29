@@ -5,7 +5,7 @@
 package incominghandler
 
 import (
-	"github.com/lxfontes/component/gen/wasi/http/types"
+	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
 
 // Exports represents the caller-defined exports from "wasi:http/incoming-handler@0.2.0".

@@ -6,9 +6,9 @@
 package udp
 
 import (
-	"github.com/lxfontes/component/gen/wasi/io/poll"
-	"github.com/lxfontes/component/gen/wasi/sockets/network"
 	"github.com/ydnar/wasm-tools-go/cm"
+	"go.wasmcloud.dev/component/gen/wasi/io/poll"
+	"go.wasmcloud.dev/component/gen/wasi/sockets/network"
 )
 
 // IncomingDatagram represents the record "wasi:sockets/udp@0.2.0#incoming-datagram".

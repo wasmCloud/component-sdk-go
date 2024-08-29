@@ -5,8 +5,8 @@
 package types
 
 import (
-	monotonicclock "github.com/lxfontes/component/gen/wasi/clocks/monotonic-clock"
 	"github.com/ydnar/wasm-tools-go/cm"
+	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	"unsafe"
 )
 

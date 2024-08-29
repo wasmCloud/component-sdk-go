@@ -1,13 +1,13 @@
 package component
 
-// register wasm imports / exports
+//go:generate wit-bindgen-go generate --world imports --out gen ./wit
+
 import (
 	"embed"
 
-	_ "github.com/lxfontes/component/gen/wasi/cli/environment"
+	// register wasm imports / exports
+	_ "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
 )
-
-//go:generate wit-bindgen-go generate --world imports --out gen ./wit
 
 //go:embed wit/*
 var Wit embed.FS
