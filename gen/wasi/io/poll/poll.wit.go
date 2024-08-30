@@ -14,7 +14,7 @@ import (
 
 // Pollable represents the imported resource "wasi:io/poll@0.2.0#pollable".
 //
-// `pollable` epresents a single I/O event which may be ready, or not.
+// `pollable` represents a single I/O event which may be ready, or not.
 //
 //	resource pollable
 type Pollable cm.Resource

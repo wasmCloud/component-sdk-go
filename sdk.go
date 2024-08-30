@@ -4,14 +4,16 @@ package component
 
 import (
 	"embed"
+	"log/slog"
 
-	// register wasm imports / exports
-	_ "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
+	"go.wasmcloud.dev/component/log/wasilog"
+	"go.wasmcloud.dev/component/net"
 )
 
 //go:embed wit/*
 var Wit embed.FS
 
-func Init() {
-	// blank function. exercise the _ imports
-}
+var DefaultLogger = slog.New(wasilog.DefaultOptions().NewHandler())
+
+// exposed as public variable so components can mock calls
+var EnableSockets = net.EnableSockets

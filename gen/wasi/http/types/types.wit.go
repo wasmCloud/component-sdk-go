@@ -809,10 +809,12 @@ func wasmimport_NewFields() (result0 uint32)
 // list with the same key.
 //
 // The tuple is a pair of the field key, represented as a string, and
-// Value, represented as a list of bytes.
+// Value, represented as a list of bytes. In a valid Fields, all keys
+// and values are valid UTF-8 strings. However, values are not always
+// well-formed, so they are represented as a raw list of bytes.
 //
-// An error result will be returned if any `field-key` or `field-value` is
-// syntactically invalid, or if a field is forbidden.
+// An error result will be returned if any header or value was
+// syntactically invalid, or if a header was forbidden.
 //
 //	from-list: static func(entries: list<tuple<field-key, field-value>>) -> result<fields,
 //	header-error>
@@ -834,9 +836,6 @@ func wasmimport_FieldsFromList(entries0 *cm.Tuple[FieldKey, FieldValue], entries
 // values for that key.
 //
 // Fails with `header-error.immutable` if the `fields` are immutable.
-//
-// Fails with `header-error.invalid-syntax` if the `field-key` or
-// `field-value` are syntactically invalid.
 //
 //	append: func(name: field-key, value: field-value) -> result<_, header-error>
 //
@@ -880,9 +879,6 @@ func wasmimport_FieldsClone(self0 uint32) (result0 uint32)
 //
 // Fails with `header-error.immutable` if the `fields` are immutable.
 //
-// Fails with `header-error.invalid-syntax` if the `field-key` is
-// syntactically invalid.
-//
 //	delete: func(name: field-key) -> result<_, header-error>
 //
 //go:nosplit
@@ -922,9 +918,9 @@ func wasmimport_FieldsEntries(self0 uint32, result *cm.List[cm.Tuple[FieldKey, F
 // Get represents the imported method "get".
 //
 // Get all of the values corresponding to a key. If the key is not present
-// in this `fields` or is syntactically invalid, an empty list is returned.
-// However, if the key is present but empty, this is represented by a list
-// with one or more empty field-values present.
+// in this `fields`, an empty list is returned. However, if the key is
+// present but empty, this is represented by a list with one or more
+// empty field-values present.
 //
 //	get: func(name: field-key) -> list<field-value>
 //
@@ -966,9 +962,6 @@ func wasmimport_FieldsHas(self0 uint32, name0 *uint8, name1 uint32) (result0 uin
 // key, if they have been set.
 //
 // Fails with `header-error.immutable` if the `fields` are immutable.
-//
-// Fails with `header-error.invalid-syntax` if the `field-key` or any of
-// the `field-value`s are syntactically invalid.
 //
 //	set: func(name: field-key, value: list<field-value>) -> result<_, header-error>
 //

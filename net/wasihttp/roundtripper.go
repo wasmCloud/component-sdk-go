@@ -5,23 +5,17 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/ydnar/wasm-tools-go/cm"
 	outgoinghandler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
-	"github.com/ydnar/wasm-tools-go/cm"
 )
-
-// NewTransport returns http.RoundTripper
-func NewTransport() http.RoundTripper {
-	return &Transport{}
-}
 
 // Transport implements http.RoundTripper
 type Transport struct{}
 
-// RoundTrip makes roundtrip
-func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return Send(req)
-}
+var _ http.RoundTripper = &Transport{}
+
+var DefaultClient = NewClient()
 
 // NewClient returns a new HTTP client compatible with wasi preview 2
 func NewClient() *http.Client {
@@ -30,7 +24,7 @@ func NewClient() *http.Client {
 	}
 }
 
-func Send(req *http.Request) (*http.Response, error) {
+func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	or, err := NewOutgoingHttpRequest(req)
 	if err != nil {
 		return nil, err
@@ -79,26 +73,4 @@ func Send(req *http.Request) (*http.Response, error) {
 	}
 
 	return resp, nil
-}
-
-func Get(url string) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return Send(req)
-}
-
-func Post(url string, contentType string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodPost, url, body)
-	if err != nil {
-		return nil, err
-	}
-
-	if contentType != "" {
-		req.Header.Set("Content-Type", contentType)
-	}
-
-	return Send(req)
 }
