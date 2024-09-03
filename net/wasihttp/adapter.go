@@ -4,28 +4,27 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
+	"sync"
 
+	"github.com/ydnar/wasm-tools-go/cm"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
-	"github.com/ydnar/wasm-tools-go/cm"
 )
 
 var _ http.ResponseWriter = &responseOutparamWriter{}
 
+type IncomingRequest = types.IncomingRequest
+
 type responseOutparamWriter struct {
-	// wasi response outparam is set at the end of http_trigger_handle
-	outparam types.ResponseOutparam
-	// wasi response
-	response types.OutgoingResponse
-	// wasi http headers
+	outparam    types.ResponseOutparam
+	response    types.OutgoingResponse
 	wasiHeaders types.Fields
-	// go httpHeaders are reconciled on call to WriteHeader, Flush or at the end of http_trigger_handle
 	httpHeaders http.Header
-	// wasi response body is set on first write because it can only be called once
-	body *types.OutgoingBody
-	// wasi response stream is set on first write because it can only be called once
-	stream *streams.OutputStream
+	body        *types.OutgoingBody
+	stream      *streams.OutputStream
+
+	headerOnce sync.Once
+	headerErr  error
 
 	statuscode int
 }
@@ -35,73 +34,101 @@ func (row *responseOutparamWriter) Header() http.Header {
 }
 
 func (row *responseOutparamWriter) Write(buf []byte) (int, error) {
-	// acquire the response body's resource handle on first call to write
-	if row.body == nil {
-		bodyResult := row.response.Body()
-		if bodyResult.IsErr() {
-			return 0, fmt.Errorf("failed to acquire resource handle to response body: %s", bodyResult.Err())
-		}
-		row.body = bodyResult.OK()
-
-		writeResult := row.body.Write()
-		if writeResult.IsErr() {
-			return 0, fmt.Errorf("failed to acquire resource handle for response body's stream: %s", writeResult.Err())
-		}
-		row.stream = writeResult.OK()
+	row.headerOnce.Do(row.reconcile)
+	if row.headerErr != nil {
+		return 0, row.headerErr
 	}
-
-	// //TODO: determine if we need to do these to fulfill the ResponseWriter contract
-	// // call WriteHeader(http.StatusOK) if it hasn't been called yet
-	// // call DetectContentType if headers doesn't contain content-type yet
-	// // if total data is under "a few" KB and there are no flush calls, Content-Length is added automatically
 
 	contents := cm.ToList(buf)
 	writeResult := row.stream.Write(contents)
 	if writeResult.IsErr() {
 		if writeResult.Err().Closed() {
-			return 0, fmt.Errorf("failed to write to response body's stream: closed")
+			return 0, io.EOF
 		}
 
-		// TODO: possible nil error here
 		return 0, fmt.Errorf("failed to write to response body's stream: %s", writeResult.Err().LastOperationFailed().ToDebugString())
 	}
-
-	result := cm.OK[cm.Result[types.ErrorCodeShape, types.OutgoingResponse, types.ErrorCode]](row.response)
-	types.ResponseOutparamSet(row.outparam, result)
 
 	return int(contents.Len()), nil
 }
 
 func (row *responseOutparamWriter) WriteHeader(statusCode int) {
-	row.statuscode = statusCode
-	row.reconcile()
+	row.headerOnce.Do(func() {
+		row.statuscode = statusCode
+		row.reconcile()
+	})
 }
 
 // reconcile headers from go to wasi
 func (row *responseOutparamWriter) reconcileHeaders() error {
 	for key, vals := range row.httpHeaders {
-		// convert each value distincly
 		fieldVals := []types.FieldValue{}
 		for _, val := range vals {
 			fieldVals = append(fieldVals, types.FieldValue(cm.ToList([]uint8(val))))
 		}
 
 		if result := row.wasiHeaders.Set(types.FieldKey(key), cm.ToList(fieldVals)); result.IsErr() {
-			switch *result.Err() {
-			case types.HeaderErrorInvalidSyntax:
-				return fmt.Errorf("failed to set header %s to [%s]: invalid syntax", key, strings.Join(vals, ","))
-			case types.HeaderErrorForbidden:
-				return fmt.Errorf("failed to set forbidden header key %s", key)
-			case types.HeaderErrorImmutable:
-				return fmt.Errorf("failed to set header on immutable header fields")
-			default:
-				return fmt.Errorf("not sure what happened here?")
-			}
+			return fmt.Errorf("failed to set header %s: %s", key, result.Err())
 		}
 	}
 
-	// TODO: handle deleted headers
+	// from now on these are trailers
+	row.httpHeaders = http.Header{}
 
+	return nil
+}
+
+func (row *responseOutparamWriter) reconcile() {
+	if row.headerErr = row.reconcileHeaders(); row.headerErr != nil {
+		return
+	}
+
+	row.response = types.NewOutgoingResponse(row.wasiHeaders)
+	row.response.SetStatusCode(types.StatusCode(row.statuscode))
+
+	bodyResult := row.response.Body()
+	if bodyResult.IsErr() {
+		row.headerErr = fmt.Errorf("failed to acquire resource handle to response body: %s", bodyResult.Err())
+		return
+	}
+	row.body = bodyResult.OK()
+
+	writeResult := row.body.Write()
+	if writeResult.IsErr() {
+		row.headerErr = fmt.Errorf("failed to acquire resource handle for response body's stream: %s", writeResult.Err())
+		return
+	}
+	row.stream = writeResult.OK()
+
+	result := cm.OK[cm.Result[types.ErrorCodeShape, types.OutgoingResponse, types.ErrorCode]](row.response)
+	types.ResponseOutparamSet(row.outparam, result)
+}
+
+func (row *responseOutparamWriter) Close() error {
+	row.stream.ResourceDrop()
+
+	var maybeTrailers cm.Option[types.Fields]
+	wasiTrailers := types.NewFields()
+	for key, vals := range row.httpHeaders {
+		fieldVals := []types.FieldValue{}
+		for _, val := range vals {
+			fieldVals = append(fieldVals, types.FieldValue(cm.ToList([]uint8(val))))
+		}
+
+		if result := wasiTrailers.Set(types.FieldKey(key), cm.ToList(fieldVals)); result.IsErr() {
+			return fmt.Errorf("failed to set trailer %s: %s", key, result.Err())
+		}
+	}
+	if len(row.httpHeaders) > 0 {
+		maybeTrailers = cm.Some(wasiTrailers)
+	} else {
+		maybeTrailers = cm.None[types.Fields]()
+	}
+
+	res := types.OutgoingBodyFinish(*row.body, maybeTrailers)
+	if res.IsErr() {
+		return fmt.Errorf("failed to set trailer: %v", res.Err())
+	}
 	return nil
 }
 
@@ -111,65 +138,36 @@ func NewHttpResponseWriter(out types.ResponseOutparam) *responseOutparamWriter {
 		outparam:    out,
 		httpHeaders: http.Header{},
 		wasiHeaders: types.NewFields(),
+		statuscode:  http.StatusOK,
 	}
 
 	return row
 }
 
-func (row *responseOutparamWriter) reconcile() {
-	err := row.reconcileHeaders()
-	if err != nil {
-		// TODO
-	}
-
-	// setting headers after this cause panic
-	// TODO: debug
-	row.response = types.NewOutgoingResponse(row.wasiHeaders)
-
-	// set status code
-	row.response.SetStatusCode(types.StatusCode(row.statuscode))
-}
-
-func println(msg string) {
-	fmt.Println(cm.ToList([]byte(msg)))
-	fmt.Println(cm.ToList([]byte("\n")))
-}
-
-type IncomingRequest = types.IncomingRequest
-
 // convert the IncomingRequest to http.Request
 func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
-	// convert the http method to string
 	method, err := methodToString(ir.Method())
 	if err != nil {
 		return nil, err
 	}
 
-	// convert the path with query to a url
 	var url string
-	if pathWithQuery := ir.PathWithQuery(); pathWithQuery.None() {
-		url = ""
-	} else {
+	if pathWithQuery := ir.PathWithQuery(); !pathWithQuery.None() {
 		url = *pathWithQuery.Some()
 	}
 
-	// convert the body to a reader
-	var body io.Reader
-	if consumeResult := ir.Consume(); consumeResult.IsErr() {
-		return nil, fmt.Errorf("failed to consume incoming request %s", *consumeResult.Err())
-	} else if streamResult := consumeResult.OK().Stream(); streamResult.IsErr() {
-		return nil, fmt.Errorf("failed to consume incoming requests's stream %s", streamResult.Err())
-	} else {
-		body = NewReader(*streamResult.OK())
+	trailers := http.Header{}
+	body, err := NewIncomingBodyTrailer(ir, trailers)
+	if err != nil {
+		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}
 
-	// create a new request
 	req, err = http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
 	}
+	req.Trailer = trailers
 
-	// update additional fields
 	toHttpHeader(ir.Headers(), &req.Header)
 
 	return req, nil
@@ -178,33 +176,24 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 func methodToString(m types.Method) (string, error) {
 	if m.Connect() {
 		return "CONNECT", nil
-	}
-	if m.Delete() {
+	} else if m.Delete() {
 		return "DELETE", nil
-	}
-	if m.Get() {
+	} else if m.Get() {
 		return "GET", nil
-	}
-	if m.Head() {
+	} else if m.Head() {
 		return "HEAD", nil
-	}
-	if m.Options() {
+	} else if m.Options() {
 		return "OPTIONS", nil
-	}
-	if m.Patch() {
+	} else if m.Patch() {
 		return "PATCH", nil
-	}
-	if m.Post() {
+	} else if m.Post() {
 		return "POST", nil
-	}
-	if m.Put() {
+	} else if m.Put() {
 		return "PUT", nil
-	}
-	if m.Trace() {
+	} else if m.Trace() {
 		return "TRACE", nil
-	}
-	if other := m.Other(); other != nil {
-		return *other, fmt.Errorf("unknown http method 'other'")
+	} else if other := m.Other(); other != nil {
+		return *other, fmt.Errorf("unknown http method '%s'", *other)
 	}
 	return "", fmt.Errorf("failed to convert http method")
 }
@@ -220,9 +209,12 @@ func toHttpHeader(src types.Fields, dest *http.Header) {
 // convert the IncomingRequest to http.Request
 func NewOutgoingHttpRequest(req *http.Request) (types.OutgoingRequest, error) {
 	headers := types.NewFields()
-	toWasiHeader(req.Header, headers)
+	if err := toWasiHeader(req.Header, headers); err != nil {
+		return types.NewOutgoingRequest(headers), err
+	}
 
 	or := types.NewOutgoingRequest(headers)
+
 	or.SetAuthority(cm.Some(req.Host))
 	or.SetMethod(toWasiMethod(req.Method))
 	or.SetPathWithQuery(cm.Some(req.URL.Path + "?" + req.URL.Query().Encode()))
@@ -239,7 +231,7 @@ func NewOutgoingHttpRequest(req *http.Request) (types.OutgoingRequest, error) {
 	return or, nil
 }
 
-func toWasiHeader(src http.Header, dest types.Fields) {
+func toWasiHeader(src http.Header, dest types.Fields) error {
 	for k, v := range src {
 		key := types.FieldKey(k)
 		fieldVals := []types.FieldValue{}
@@ -249,8 +241,13 @@ func toWasiHeader(src http.Header, dest types.Fields) {
 		}
 
 		// TODO(rjindal): check error
-		_ = dest.Set(key, cm.ToList(fieldVals))
+		res := dest.Set(key, cm.ToList(fieldVals))
+		if res.IsErr() {
+			return fmt.Errorf("failed to set header %s: %s", k, res.Err())
+		}
 	}
+
+	return nil
 }
 
 func toWasiMethod(s string) types.Method {

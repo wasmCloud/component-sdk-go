@@ -3,8 +3,11 @@ package net
 import (
 	"net"
 	"net/netip"
+	"sync"
 	"time"
 
+	instancenetwork "go.wasmcloud.dev/component/gen/wasi/sockets/instance-network"
+	"go.wasmcloud.dev/component/gen/wasi/sockets/network"
 	"tinygo.org/x/drivers/netdev"
 	"tinygo.org/x/drivers/netlink"
 )
@@ -12,17 +15,18 @@ import (
 type Config struct{}
 
 var (
-	_ netlink.Netlinker = &Device{}
-	_ netdev.Netdever   = &Device{}
+	_            netlink.Netlinker = &Device{}
+	_            netdev.Netdever   = &Device{}
+	registration sync.Once
 )
 
 type Device struct {
-	cfg *Config
+	network network.Network
 }
 
-func NewDevice(cfg *Config) *Device {
+func NewDevice(network network.Network) *Device {
 	return &Device{
-		cfg: cfg,
+		network: network,
 	}
 }
 
@@ -160,7 +164,9 @@ func (d *Device) IsSocketDataAvailable() bool {
 }
 
 func EnableSockets() {
-	cfg := Config{}
-	dev := NewDevice(&cfg)
-	netdev.UseNetdev(dev)
+	registration.Do(func() {
+		network := instancenetwork.InstanceNetwork()
+		dev := NewDevice(network)
+		netdev.UseNetdev(dev)
+	})
 }
