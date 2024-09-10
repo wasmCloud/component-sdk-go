@@ -25,6 +25,9 @@ func entryHandler(w http.ResponseWriter, r *http.Request) {
 		"/form":    formHandler,
 		"/post":    postHandler,
 	}
+
+	logger.Info("Request received", "path", r.URL.Path)
+
 	if handler, ok := handlers[r.URL.Path]; ok {
 		handler(w, r)
 		return
