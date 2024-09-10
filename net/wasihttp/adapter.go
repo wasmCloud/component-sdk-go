@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )

@@ -8,11 +8,11 @@
 package types
 
 import (
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	monotonicclock "github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/clocks/monotonic-clock"
 	ioerror "github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/io/error"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/io/poll"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/io/streams"
-	"github.com/ydnar/wasm-tools-go/cm"
 )
 
 // Method represents the variant "wasi:http/types@0.2.0#method".

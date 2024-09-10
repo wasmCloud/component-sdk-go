@@ -7,7 +7,7 @@
 package terminalstdout
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	terminaloutput "go.wasmcloud.dev/component/gen/wasi/cli/terminal-output"
 )
 

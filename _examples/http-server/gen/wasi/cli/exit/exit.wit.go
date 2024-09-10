@@ -4,7 +4,7 @@
 package exit
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 )
 
 // Exit represents the imported function "exit".

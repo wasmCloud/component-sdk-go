@@ -10,7 +10,7 @@
 package terminaloutput
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 )
 
 // TerminalOutput represents the imported resource "wasi:cli/terminal-output@0.2.0#terminal-output".

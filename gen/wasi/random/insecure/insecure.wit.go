@@ -9,7 +9,7 @@
 package insecure
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 )
 
 // GetInsecureRandomBytes represents the imported function "get-insecure-random-bytes".

@@ -4,8 +4,8 @@
 package stderr
 
 import (
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/io/streams"
-	"github.com/ydnar/wasm-tools-go/cm"
 )
 
 // GetStderr represents the imported function "get-stderr".

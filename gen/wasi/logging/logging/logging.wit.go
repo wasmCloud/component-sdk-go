@@ -7,7 +7,7 @@
 package logging
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 )
 
 // Level represents the enum "wasi:logging/logging#level".
@@ -80,3 +80,7 @@ func Log(level Level, context string, message string) {
 	wasmimport_Log((uint32)(level0), (*uint8)(context0), (uint32)(context1), (*uint8)(message0), (uint32)(message1))
 	return
 }
+
+//go:wasmimport wasi:logging/logging log
+//go:noescape
+func wasmimport_Log(level0 uint32, context0 *uint8, context1 uint32, message0 *uint8, message1 uint32)

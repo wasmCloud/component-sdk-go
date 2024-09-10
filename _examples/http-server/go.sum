@@ -1,11 +1,9 @@
+github.com/bytecodealliance/wasm-tools-go v0.2.0 h1:JdmiZew7ewHjf+ZGGRE4gZM85Ad/PGW/5I57hepEOjQ=
+github.com/bytecodealliance/wasm-tools-go v0.2.0/go.mod h1:2GnJCUlcDrslZ/L6+yYqoUnewDlBvqRS2N/0NW9ro6w=
 github.com/samber/lo v1.44.0 h1:5il56KxRE+GHsm1IR+sZ/6J42NODigFiqCWpSc2dybA=
 github.com/samber/lo v1.44.0/go.mod h1:RmDH9Ct32Qy3gduHQuKJ3gW1fMHAnE/fAzQuf6He5cU=
 github.com/samber/slog-common v0.17.1 h1:jTqqLBgoJshpoxlPSGiypyOanjH6tY+i9bwyYmIbjhI=
 github.com/samber/slog-common v0.17.1/go.mod h1:mZSJhinB4aqHziR0SKPqpVZjJ0JO35JfH+dDIWqaCBk=
-github.com/ydnar/wasm-tools-go v0.1.5 h1:ah2WT4gH0IrmN29ZSsjgNC9SPsdXZ+KN+o9uTZqNVSI=
-github.com/ydnar/wasm-tools-go v0.1.5/go.mod h1:L3sDi5rbAMJNmMO5cpDRzYYhB0r9xIU0xgpKjwU0Adg=
-go.wasmcloud.dev/component v0.0.0-20240910182305-2785f866ff0f h1:IXkIqJafIGW6QTa5rGlHDItPyhwMaUxT2KDj8zIM7g4=
-go.wasmcloud.dev/component v0.0.0-20240910182305-2785f866ff0f/go.mod h1:bEuNwzr+UoS2/YQOtiKZMgpy2ysl+5kJFATR8/Ufh6I=
 golang.org/x/text v0.16.0 h1:a94ExnEXNtEwYLGJSIUxnWoxoRz/ZcCsV63ROupILh4=
 golang.org/x/text v0.16.0/go.mod h1:GhwF1Be+LQoKShO3cGOHzqOgRrGaYc9AvblQOmPVHnI=
 tinygo.org/x/drivers v0.28.0 h1:ROVrGGXddmpn2+oV/Bu3LceYbtPCJckmgIqvPcN/L0k=

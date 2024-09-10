@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	outgoinghandler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
@@ -96,7 +96,6 @@ func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	trailers := http.Header{}
 
 	respBody, err := NewIncomingBodyTrailer(result, trailers)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}

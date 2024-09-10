@@ -8,7 +8,7 @@
 package types
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	ioerror "go.wasmcloud.dev/component/gen/wasi/io/error"
 	"go.wasmcloud.dev/component/gen/wasi/io/poll"

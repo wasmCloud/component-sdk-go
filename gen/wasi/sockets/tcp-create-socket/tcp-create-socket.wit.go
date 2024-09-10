@@ -4,7 +4,7 @@
 package tcpcreatesocket
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"go.wasmcloud.dev/component/gen/wasi/sockets/network"
 	"go.wasmcloud.dev/component/gen/wasi/sockets/tcp"
 )

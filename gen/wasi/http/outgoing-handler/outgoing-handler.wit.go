@@ -7,7 +7,7 @@
 package outgoinghandler
 
 import (
-	"github.com/ydnar/wasm-tools-go/cm"
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
 

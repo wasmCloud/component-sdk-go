@@ -3,7 +3,7 @@ module github.com/wasmCloud/component-sdk-go/_examples/http-server
 go 1.22.5
 
 require (
-	github.com/ydnar/wasm-tools-go v0.1.5
+	github.com/bytecodealliance/wasm-tools-go v0.2.0
 	go.wasmcloud.dev/component v0.0.0-20240910182305-2785f866ff0f
 )
 

@@ -4,9 +4,9 @@
 package tcpcreatesocket
 
 import (
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/sockets/network"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/sockets/tcp"
-	"github.com/ydnar/wasm-tools-go/cm"
 )
 
 // CreateTCPSocket represents the imported function "create-tcp-socket".
