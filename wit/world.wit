@@ -3,7 +3,6 @@ package wasmcloud:component;
 world imports {
   // tinygo
   include wasi:cli/imports@0.2.0;
-  include wasi:filesystem/imports@0.2.0;
 
   // wasi
   import wasi:logging/logging;

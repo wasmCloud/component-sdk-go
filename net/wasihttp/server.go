@@ -20,8 +20,8 @@ var defaultHandler = func(http.ResponseWriter, *http.Request) {
 
 // Handle sets the handler function for the http trigger.
 // It must be set in an init() function.
-func Handle(fn func(http.ResponseWriter, *http.Request)) {
-	handler = fn
+func Handle(h http.Handler) {
+	handler = h.ServeHTTP
 }
 
 func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutparam) {

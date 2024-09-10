@@ -10,13 +10,30 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/logging/logging"
 )
 
+type contextKey string
+
+func (k contextKey) String() string {
+	return string(k)
+}
+
+const ContextKey = contextKey("wasi-context")
+
+func ContextAttr(name string) slog.Attr {
+	return slog.String(string(ContextKey), name)
+}
+
+type wasmLoggerFunc func(level logging.Level, context string, message string)
+
 type WasiLoggingOption struct {
-	// log level (default: debug)
+	// required: log function
+	LoggerFunc wasmLoggerFunc
+	// log level (default: info)
 	Level slog.Leveler
 
 	// optional: fetch attributes from context
 	AttrFromContext []func(ctx context.Context) []slog.Attr
 
+	// optional: replace attributes
 	ReplaceAttr func(groups []string, a slog.Attr) slog.Attr
 }
 
@@ -43,17 +60,33 @@ func wasiLevel(level slog.Level) logging.Level {
 	}
 }
 
+func unrollGroups(attrs []slog.Attr) []slog.Attr {
+	var output []slog.Attr
+	for i := range attrs {
+		attr := attrs[i]
+		switch attr.Value.Kind() {
+		case slog.KindGroup:
+			output = append(output, unrollGroups(attr.Value.Group())...)
+		case slog.KindLogValuer:
+			output = append(output, slog.String(attr.Key, attr.Value.LogValuer().LogValue().String()))
+		default:
+			output = append(output, attr)
+		}
+	}
+	return output
+}
+
 func wasiConverter(replaceAttr func(groups []string, a slog.Attr) slog.Attr, loggerAttr []slog.Attr, groups []string, record *slog.Record) (string, string) {
 	attrs := slogcommon.AppendRecordAttrsToAttrs(loggerAttr, groups, record)
-
-	attrs = slogcommon.ReplaceAttrs(replaceAttr, []string{}, attrs...)
+	attrs = slogcommon.ReplaceAttrs(replaceAttr, groups, attrs...)
 	attrs = slogcommon.RemoveEmptyAttrs(attrs)
+	attrs = unrollGroups(attrs)
 
 	extra := slogcommon.AttrsToString(attrs...)
-
-	context, ok := extra["context"]
+	context, ok := extra[string(ContextKey)]
 	if ok {
-		delete(extra, "context")
+		// the context key is moved to the 'Context' field in wasi:logging. remove it from the log message.
+		delete(extra, string(ContextKey))
 	}
 
 	var formattedAttrs []string
@@ -67,8 +100,26 @@ func wasiConverter(replaceAttr func(groups []string, a slog.Attr) slog.Attr, log
 
 func DefaultOptions() WasiLoggingOption {
 	return WasiLoggingOption{
-		Level:           slog.LevelDebug,
-		AttrFromContext: []func(ctx context.Context) []slog.Attr{},
+		LoggerFunc: logging.Log,
+		Level:      slog.LevelInfo,
+		AttrFromContext: []func(ctx context.Context) []slog.Attr{
+			func(ctx context.Context) []slog.Attr {
+				if contextName, ok := ctx.Value(ContextKey).(string); ok {
+					return []slog.Attr{slog.String(string(ContextKey), string(contextName))}
+				}
+				return nil
+			},
+		},
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			// Make so groups become a prefix of the key
+			// Ex: groups = ["a", "b"], key = "c" => "a.b.c"
+			if len(groups) == 0 {
+				return a
+			}
+
+			a.Key = strings.Join(groups, ".") + "." + a.Key
+			return a
+		},
 	}
 }
 
@@ -86,7 +137,7 @@ func (h *WebassemblyHandler) Handle(ctx context.Context, record slog.Record) err
 	fromContext := slogcommon.ContextExtractor(ctx, h.option.AttrFromContext)
 	message, logContext := wasiConverter(h.option.ReplaceAttr, append(h.attrs, fromContext...), h.groups, &record)
 
-	logging.Log(wasiLevel(record.Level), logContext, message)
+	h.option.LoggerFunc(wasiLevel(record.Level), logContext, message)
 
 	return nil
 }
