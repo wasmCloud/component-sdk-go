@@ -70,7 +70,7 @@ func (r *inputStreamReader) parseTrailers() {
 }
 
 func (r *inputStreamReader) Read(p []byte) (n int, err error) {
-	readResult := r.stream.Read(uint64(len(p)))
+	readResult := r.stream.BlockingRead(uint64(len(p)))
 	if readResult.IsErr() {
 		readErr := readResult.Err()
 		if readErr.Closed() {
@@ -80,7 +80,7 @@ func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 		return 0, fmt.Errorf("failed to read from InputStream %s", readErr.LastOperationFailed().ToDebugString())
 	}
 
-	readList := readResult.OK()
+	readList := *readResult.OK()
 	copy(p, readList.Slice())
 	return int(readList.Len()), nil
 }

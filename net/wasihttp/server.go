@@ -24,6 +24,10 @@ func Handle(h http.Handler) {
 	handler = h.ServeHTTP
 }
 
+func HandleFunc(h http.HandlerFunc) {
+	handler = h
+}
+
 func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutparam) {
 	defer responseOut.ResourceDrop()
 

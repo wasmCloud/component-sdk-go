@@ -1,0 +1,6 @@
+package example:http-server;
+
+world example {
+  include wasmcloud:component/imports;
+  export wasi:http/incoming-handler@0.2.0;
+}

@@ -8,7 +8,6 @@ import (
 
 	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net"
-	_ "go.wasmcloud.dev/component/net/wasihttp"
 )
 
 //go:embed wit/*

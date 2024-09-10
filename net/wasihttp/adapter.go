@@ -151,9 +151,14 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 		return nil, err
 	}
 
-	var url string
-	if pathWithQuery := ir.PathWithQuery(); !pathWithQuery.None() {
-		url = *pathWithQuery.Some()
+	authority := "localhost"
+	if auth := ir.Authority(); !auth.None() {
+		authority = *auth.Some()
+	}
+
+	pathWithQuery := "/"
+	if p := ir.PathWithQuery(); !p.None() {
+		pathWithQuery = *p.Some()
 	}
 
 	trailers := http.Header{}
@@ -162,6 +167,7 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}
 
+	url := fmt.Sprintf("http://%s%s", authority, pathWithQuery)
 	req, err = http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -169,6 +175,10 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 	req.Trailer = trailers
 
 	toHttpHeader(ir.Headers(), &req.Header)
+
+	req.Host = authority
+	req.URL.Host = authority
+	req.RequestURI = pathWithQuery
 
 	return req, nil
 }
