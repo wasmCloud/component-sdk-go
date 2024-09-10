@@ -14,6 +14,7 @@ import (
 var logger = component.DefaultLogger
 
 func init() {
+	// We can't use http.ServeMux yet ( only symbol linking is supported in 'init' )
 	wasihttp.HandleFunc(entryHandler)
 }
 
