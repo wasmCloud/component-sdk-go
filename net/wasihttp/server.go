@@ -29,8 +29,6 @@ func HandleFunc(h http.HandlerFunc) {
 }
 
 func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutparam) {
-	defer responseOut.ResourceDrop()
-
 	httpReq, err := NewHttpRequest(request)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to convert wasi/http/types.IncomingRequest to http.Request: %s\n", err)

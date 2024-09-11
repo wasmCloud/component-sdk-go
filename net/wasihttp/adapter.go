@@ -49,6 +49,8 @@ func (row *responseOutparamWriter) Write(buf []byte) (int, error) {
 		return 0, fmt.Errorf("failed to write to response body's stream: %s", writeResult.Err().LastOperationFailed().ToDebugString())
 	}
 
+	row.stream.BlockingFlush()
+
 	return int(contents.Len()), nil
 }
 
@@ -105,6 +107,7 @@ func (row *responseOutparamWriter) reconcile() {
 }
 
 func (row *responseOutparamWriter) Close() error {
+	row.stream.BlockingFlush()
 	row.stream.ResourceDrop()
 
 	var maybeTrailers cm.Option[types.Fields]
