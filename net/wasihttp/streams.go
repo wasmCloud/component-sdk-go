@@ -127,7 +127,7 @@ func (r *outputStreamReader) Close() error {
 
 func (r *outputStreamReader) Write(p []byte) (n int, err error) {
 	contents := cm.ToList(p)
-	writeResult := r.stream.Write(contents)
+	writeResult := r.stream.BlockingWriteAndFlush(contents)
 	if writeResult.IsErr() {
 		if writeResult.Err().Closed() {
 			return 0, io.EOF

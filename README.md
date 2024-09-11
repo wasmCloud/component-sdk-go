@@ -2,6 +2,10 @@
 
 Warning: API stabilization in progress. Once ready it will be published as `v0.0.1`.
 
+The Go Component SDK provides a set of packages to simplify the development of WebAssembly components targeting the [wasmCloud](https://wasmcloud.com) host runtime.
+
+Writing a wasmCloud Capability Provider? Check out the [Go Provider SDK](https://github.com/wasmCloud/provider-sdk-go).
+
 # Setup
 
 Requires tinygo 0.33 or above.

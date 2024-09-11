@@ -71,8 +71,17 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
+	logger := component.ContextLogger("postHandler")
+
 	w.WriteHeader(http.StatusOK)
-	io.Copy(w, r.Body)
+
+	n, err := io.Copy(w, r.Body)
+	if err != nil {
+		logger.Error("Error copying body", "error", err)
+		return
+	}
+
+	logger.Info("Copied body", "bytes", n)
 }
 
 func main() {}
