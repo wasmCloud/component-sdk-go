@@ -2,6 +2,26 @@
 
 Warning: API stabilization in progress. Once ready it will be published as `v0.0.1`.
 
+# Setup
+
+Requires tinygo 0.33 or above.
+
+Import `go.wasmcloud.dev/component` in your Go module.
+
+Import the SDK WIT. In `wit/deps.toml`:
+
+```
+wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/<TBD>.tar.gz"
+```
+
+Run `wit-deps` to update your wit dependencies.
+
+And in your world definition:
+
+```
+  include wasmcloud:component/imports;
+```
+
 ## net/wasihttp
 
 The `wasihttp` package provides an implementation of `http.Handler` backed by `wasi:http`, as well as a `http.RoundTripper` backed by `wasi:http`.

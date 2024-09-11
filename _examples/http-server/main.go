@@ -11,14 +11,13 @@ import (
 	"go.wasmcloud.dev/component/net/wasihttp"
 )
 
-var logger = component.DefaultLogger
-
 func init() {
 	// We can't use http.ServeMux yet ( only symbol linking is supported in 'init' )
 	wasihttp.HandleFunc(entryHandler)
 }
 
 func entryHandler(w http.ResponseWriter, r *http.Request) {
+	logger := component.ContextLogger("entryHandler")
 	handlers := map[string]http.HandlerFunc{
 		"/headers": headersHandler,
 		"/error":   errorHandler,
@@ -26,7 +25,7 @@ func entryHandler(w http.ResponseWriter, r *http.Request) {
 		"/post":    postHandler,
 	}
 
-	logger.Info("Request received", "path", r.URL.Path)
+	logger.Info("Request received", "host", r.Host, "path", r.URL.Path, "agent", r.Header.Get("User-Agent"))
 
 	if handler, ok := handlers[r.URL.Path]; ok {
 		handler(w, r)
