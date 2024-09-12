@@ -8,6 +8,10 @@ import (
 
 	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net"
+
+	// TODO(lxf): Investigate if it is better to remove this import and let callers go directly to wasihttp
+	// Would allow callers to avoid importing wasmcloud:component world.
+	_ "go.wasmcloud.dev/component/net/wasihttp"
 )
 
 //go:embed wit/*
