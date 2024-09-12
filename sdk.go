@@ -1,6 +1,6 @@
 package component
 
-//go:generate wit-bindgen-go generate --world imports --out gen ./wit
+//go:generate wit-bindgen-go generate --world sdk --out gen ./wit
 
 import (
 	"embed"
@@ -8,10 +8,6 @@ import (
 
 	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net"
-
-	// TODO(lxf): Investigate if it is better to remove this import and let callers go directly to wasihttp
-	// Would allow callers to avoid importing wasmcloud:component world.
-	_ "go.wasmcloud.dev/component/net/wasihttp"
 )
 
 //go:embed wit/*
