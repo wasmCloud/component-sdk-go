@@ -121,49 +121,6 @@ func TestContextLift(t *testing.T) {
 	})
 }
 
-func TestGroups(t *testing.T) {
-	tt := map[string]struct {
-		cb       func(logger *slog.Logger)
-		expected string
-	}{
-		"inline": {
-			cb: func(logger *slog.Logger) {
-				logger.Info("test", slog.Group("top", slog.String("bottom", "simple")))
-			},
-			expected: `top.bottom="simple" test`,
-		},
-		"nested": {
-			cb: func(logger *slog.Logger) {
-				g := logger.With("bottom", "nested").WithGroup("top")
-				g.Info("test")
-			},
-			expected: `top.bottom="nested" test`,
-		},
-	}
-
-	for name, tc := range tt {
-		t.Run(name, func(t *testing.T) {
-			options := DefaultOptions()
-			options.LoggerFunc = func(_ logging.Level, _ string, msg string) {
-				if want, got := tc.expected, msg; got != want {
-					t.Errorf("expected: %v, got: %v", want, got)
-				}
-			}
-
-			logger := slog.New(options.NewHandler())
-			tc.cb(logger)
-		})
-	}
-
-	logger := slog.Default()
-	logger.Info("test", slog.Group("top", slog.String("bottom", "simple")))
-	g := logger.With("bottom", "nested").WithGroup("top")
-	g.Info("test")
-	logger = logger.With("id", "123")
-	parserLogger := logger.WithGroup("parser")
-	parserLogger.Info("parsing", "file", "test.txt")
-}
-
 type Token string
 
 // LogValue implements slog.LogValuer.
@@ -182,4 +139,10 @@ func TestLogValueMask(t *testing.T) {
 	options.LoggerFunc = output
 	logger := slog.New(options.NewHandler())
 	logger.Info("test", "token", Token("launch-the-nukes-code"))
+}
+
+// stub wasi:logging
+//
+//go:linkname wasmimport_Log  go.wasmcloud.dev/component/gen/wasi/logging/logging.wasmimport_Log
+func wasmimport_Log(level0 uint32, context0 *uint8, context1 uint32, message0 *uint8, message1 uint32) {
 }

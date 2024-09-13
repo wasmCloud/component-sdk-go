@@ -10,6 +10,12 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/logging/logging"
 )
 
+var DefaultLogger = slog.New(DefaultOptions().NewHandler())
+
+func ContextLogger(wasiContext string) *slog.Logger {
+	return DefaultLogger.With(ContextAttr(wasiContext))
+}
+
 type contextKey string
 
 func (k contextKey) String() string {

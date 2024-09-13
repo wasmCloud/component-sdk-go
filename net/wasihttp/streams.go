@@ -15,6 +15,7 @@ type BodyConsumer interface {
 	Consume() (result cm.Result[types.IncomingBody, types.IncomingBody, struct{}])
 	Headers() (result types.Fields)
 }
+
 type inputStreamReader struct {
 	consumer    BodyConsumer
 	body        types.IncomingBody
@@ -85,22 +86,23 @@ func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 	return int(readList.Len()), nil
 }
 
-func NewIncomingBodyTrailer(consumer BodyConsumer, trailers http.Header) (io.ReadCloser, error) {
+func NewIncomingBodyTrailer(consumer BodyConsumer) (io.ReadCloser, http.Header, error) {
+	trailers := http.Header{}
 	consumeResult := consumer.Consume()
 	if consumeResult.IsErr() {
-		return nil, fmt.Errorf("failed to consume incoming request %s", *consumeResult.Err())
+		return nil, nil, fmt.Errorf("failed to consume incoming request %s", *consumeResult.Err())
 	}
-	body := consumeResult.OK()
+	body := *consumeResult.OK()
 	streamResult := body.Stream()
 	if streamResult.IsErr() {
-		return nil, fmt.Errorf("failed to consume incoming requests's stream %s", streamResult.Err())
+		return nil, nil, fmt.Errorf("failed to consume incoming requests's stream %s", streamResult.Err())
 	}
 	return &inputStreamReader{
 		consumer: consumer,
 		trailers: trailers,
-		body:     *body,
+		body:     body,
 		stream:   *streamResult.OK(),
-	}, nil
+	}, trailers, nil
 }
 
 type outputStreamReader struct {

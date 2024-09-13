@@ -11,7 +11,7 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )
 
-var _ http.ResponseWriter = &responseOutparamWriter{}
+var _ http.ResponseWriter = (*responseOutparamWriter)(nil)
 
 type IncomingRequest = types.IncomingRequest
 
@@ -34,6 +34,7 @@ func (row *responseOutparamWriter) Header() http.Header {
 }
 
 func (row *responseOutparamWriter) Write(buf []byte) (int, error) {
+	// NOTE(lxf): If this is the first write, make sure we set the headers/statuscode
 	row.headerOnce.Do(row.reconcile)
 	if row.headerErr != nil {
 		return 0, row.headerErr
@@ -74,7 +75,7 @@ func (row *responseOutparamWriter) reconcileHeaders() error {
 		}
 	}
 
-	// from now on these are trailers
+	// NOTE(lxf): once headers are written we clear them out so they can emit http trailers
 	row.httpHeaders = http.Header{}
 
 	return nil
@@ -164,8 +165,7 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 		pathWithQuery = *p.Some()
 	}
 
-	trailers := http.Header{}
-	body, err := NewIncomingBodyTrailer(ir, trailers)
+	body, trailers, err := NewIncomingBodyTrailer(ir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}

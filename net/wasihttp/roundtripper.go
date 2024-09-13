@@ -21,6 +21,7 @@ var _ http.RoundTripper = (*Transport)(nil)
 
 var (
 	DefaultTransport = &Transport{
+		// NOTE(lxf): Same as stdlib http.Transport
 		ConnectTimeout: 30 * time.Second,
 	}
 	DefaultClient = &http.Client{Transport: DefaultTransport}
@@ -71,7 +72,7 @@ func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		types.OutgoingBodyFinish(body, cm.Some(trailers))
 	}
 
-	top := handleResp.OK()
+	top := *handleResp.OK()
 	// wait until resp is returned
 	subscription := top.Subscribe()
 	subscription.Block()
@@ -92,16 +93,14 @@ func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("%v", resultOption.Err())
 	}
 
-	result := resultOption.OK()
-	trailers := http.Header{}
-
-	respBody, err := NewIncomingBodyTrailer(result, trailers)
+	incomingBodyTrailer := *resultOption.OK()
+	respBody, trailers, err := NewIncomingBodyTrailer(incomingBodyTrailer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}
 
 	resp := &http.Response{
-		StatusCode: int(result.Status()),
+		StatusCode: int(incomingBodyTrailer.Status()),
 		Body:       respBody,
 		Trailer:    trailers,
 	}
