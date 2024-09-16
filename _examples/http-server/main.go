@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"go.wasmcloud.dev/component"
+	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net/wasihttp"
 )
 
@@ -17,7 +17,7 @@ func init() {
 }
 
 func entryHandler(w http.ResponseWriter, r *http.Request) {
-	logger := component.ContextLogger("entryHandler")
+	logger := wasilog.ContextLogger("entryHandler")
 	handlers := map[string]http.HandlerFunc{
 		"/headers": headersHandler,
 		"/error":   errorHandler,
@@ -71,7 +71,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	logger := component.ContextLogger("postHandler")
+	logger := wasilog.ContextLogger("postHandler")
 
 	w.WriteHeader(http.StatusOK)
 

@@ -11,7 +11,6 @@ require (
 	github.com/samber/lo v1.44.0 // indirect
 	github.com/samber/slog-common v0.17.1 // indirect
 	golang.org/x/text v0.16.0 // indirect
-	tinygo.org/x/drivers v0.28.0 // indirect
 )
 
 // TODO(lxf): remove this line once the module is published
