@@ -108,6 +108,10 @@ func (row *responseOutparamWriter) reconcile() {
 }
 
 func (row *responseOutparamWriter) Close() error {
+	if row.stream == nil {
+		return nil
+	}
+
 	row.stream.BlockingFlush()
 	row.stream.ResourceDrop()
 
@@ -138,14 +142,12 @@ func (row *responseOutparamWriter) Close() error {
 
 // convert the ResponseOutparam to http.ResponseWriter
 func NewHttpResponseWriter(out types.ResponseOutparam) *responseOutparamWriter {
-	row := &responseOutparamWriter{
+	return &responseOutparamWriter{
 		outparam:    out,
 		httpHeaders: http.Header{},
 		wasiHeaders: types.NewFields(),
 		statuscode:  http.StatusOK,
 	}
-
-	return row
 }
 
 // convert the IncomingRequest to http.Request
