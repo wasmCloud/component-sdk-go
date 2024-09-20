@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/bytecodealliance/wasm-tools-go/cm"
 	incominghandler "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
@@ -31,10 +32,14 @@ func HandleFunc(h http.HandlerFunc) {
 func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutparam) {
 	httpReq, err := NewHttpRequest(request)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to convert wasi/http/types.IncomingRequest to http.Request: %s\n", err)
+		types.ResponseOutparamSet(responseOut, cm.Err[cm.Result[types.ErrorCodeShape, types.OutgoingResponse, types.ErrorCode]](
+			types.ErrorCodeInternalError(cm.Some(err.Error()))),
+		)
 		return
 	}
-	defer httpReq.Body.Close()
+	if httpReq.Body != nil {
+		defer httpReq.Body.Close()
+	}
 
 	httpRes := NewHttpResponseWriter(responseOut)
 	defer httpRes.Close()
