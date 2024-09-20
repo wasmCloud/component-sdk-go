@@ -34,7 +34,9 @@ func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutpara
 		fmt.Fprintf(os.Stderr, "failed to convert wasi/http/types.IncomingRequest to http.Request: %s\n", err)
 		return
 	}
-	defer httpReq.Body.Close()
+	if httpReq.Body != nil {
+		defer httpReq.Body.Close()
+	}
 
 	httpRes := NewHttpResponseWriter(responseOut)
 	defer httpRes.Close()

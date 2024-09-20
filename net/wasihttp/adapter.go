@@ -169,7 +169,16 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 
 	body, trailers, err := NewIncomingBodyTrailer(ir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to consume incoming request %s", err)
+		switch method {
+		case http.MethodGet,
+			http.MethodHead,
+			http.MethodDelete,
+			http.MethodConnect,
+			http.MethodOptions,
+			http.MethodTrace:
+		default:
+			return nil, fmt.Errorf("failed to consume incoming request: %w", err)
+		}
 	}
 
 	url := fmt.Sprintf("http://%s%s", authority, pathWithQuery)
