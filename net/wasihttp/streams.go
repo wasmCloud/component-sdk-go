@@ -1,6 +1,7 @@
 package wasihttp
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -72,13 +73,12 @@ func (r *inputStreamReader) parseTrailers() {
 
 func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 	readResult := r.stream.BlockingRead(uint64(len(p)))
-	if readResult.IsErr() {
-		readErr := readResult.Err()
-		if readErr.Closed() {
+	if err := readResult.Err(); err != nil {
+		if err.Closed() {
 			r.trailerOnce.Do(r.parseTrailers)
 			return 0, io.EOF
 		}
-		return 0, fmt.Errorf("failed to read from InputStream %s", readErr.LastOperationFailed().ToDebugString())
+		return 0, fmt.Errorf("failed to read from InputStream %s", err.LastOperationFailed().ToDebugString())
 	}
 
 	readList := *readResult.OK()
@@ -90,12 +90,12 @@ func NewIncomingBodyTrailer(consumer BodyConsumer) (io.ReadCloser, http.Header, 
 	trailers := http.Header{}
 	consumeResult := consumer.Consume()
 	if consumeResult.IsErr() {
-		return nil, nil, fmt.Errorf("failed to consume incoming request %s", *consumeResult.Err())
+		return nil, nil, errors.New("failed to consume incoming request")
 	}
 	body := *consumeResult.OK()
 	streamResult := body.Stream()
 	if streamResult.IsErr() {
-		return nil, nil, fmt.Errorf("failed to consume incoming requests's stream %s", streamResult.Err())
+		return nil, nil, errors.New("failed to consume incoming request body stream")
 	}
 	return &inputStreamReader{
 		consumer: consumer,
@@ -113,7 +113,7 @@ type outputStreamReader struct {
 func NewOutgoingBody(body types.OutgoingBody) (io.WriteCloser, error) {
 	stream := body.Write()
 	if stream.IsErr() {
-		return nil, fmt.Errorf("failed to acquire resource handle to request body: %s", stream.Err())
+		return nil, errors.New("failed to acquire resource handle to request body")
 	}
 	return &outputStreamReader{
 		body:   body,
@@ -130,12 +130,11 @@ func (r *outputStreamReader) Close() error {
 func (r *outputStreamReader) Write(p []byte) (n int, err error) {
 	contents := cm.ToList(p)
 	writeResult := r.stream.BlockingWriteAndFlush(contents)
-	if writeResult.IsErr() {
-		if writeResult.Err().Closed() {
+	if err := writeResult.Err(); err != nil {
+		if err.Closed() {
 			return 0, io.EOF
 		}
-
-		return 0, fmt.Errorf("failed to write to response body's stream: %s", writeResult.Err().LastOperationFailed().ToDebugString())
+		return 0, fmt.Errorf("failed to write to response body's stream: %s", err.LastOperationFailed().ToDebugString())
 	}
 	return len(p), nil
 }
