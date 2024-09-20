@@ -199,23 +199,23 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 
 func methodToString(m types.Method) (string, error) {
 	if m.Connect() {
-		return "CONNECT", nil
+		return http.MethodConnect, nil
 	} else if m.Delete() {
-		return "DELETE", nil
+		return http.MethodDelete, nil
 	} else if m.Get() {
-		return "GET", nil
+		return http.MethodGet, nil
 	} else if m.Head() {
-		return "HEAD", nil
+		return http.MethodHead, nil
 	} else if m.Options() {
-		return "OPTIONS", nil
+		return http.MethodOptions, nil
 	} else if m.Patch() {
-		return "PATCH", nil
+		return http.MethodPatch, nil
 	} else if m.Post() {
-		return "POST", nil
+		return http.MethodPost, nil
 	} else if m.Put() {
-		return "PUT", nil
+		return http.MethodPut, nil
 	} else if m.Trace() {
-		return "TRACE", nil
+		return http.MethodTrace, nil
 	} else if other := m.Other(); other != nil {
 		return *other, fmt.Errorf("unknown http method '%s'", *other)
 	}
