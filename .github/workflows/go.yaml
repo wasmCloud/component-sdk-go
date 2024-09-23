@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: "_examples/${{ matrix.example }}./go.mod"
+          go-version-file: "_examples/${{ matrix.example }}/go.mod"
       - uses: acifani/setup-tinygo@v2
         with:
           tinygo-version: ${{ env.TINYGO_VERSION }}
