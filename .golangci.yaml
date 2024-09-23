@@ -10,8 +10,7 @@ output:
 linters:
   enable:
     - gofmt
-    # TODO(lxf): enable once we are ready to start releasing
-    #- revive
+    - revive
     - thelper
     - mirror
     - usestdlibvars
@@ -97,3 +96,4 @@ linters-settings:
     ignore-words:
     #  - valor
     #  - and
+
