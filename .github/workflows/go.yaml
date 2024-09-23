@@ -50,7 +50,9 @@ jobs:
       - uses: wasmCloud/common-actions/install-wash@main
       - uses: cargo-bins/cargo-binstall@main
       - name: Tools
-        run: cargo binstall -y wasm-tools
+        run: |
+          cargo binstall -y wasm-tools
+          wash --version
 
       - name: http-server
         working-directory: _examples/http-server
