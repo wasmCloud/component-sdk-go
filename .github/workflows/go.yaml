@@ -12,6 +12,14 @@ env:
   GOLANGCI_VERSION: "v1.61"
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.GOLANGCI_VERSION }}
+
   sdk-build:
     runs-on: ubuntu-latest
     steps:
@@ -42,7 +50,7 @@ jobs:
       - uses: wasmCloud/common-actions/install-wash@main
       - uses: cargo-bins/cargo-binstall@main
       - name: Tools
-        run: cargo binstall wasm-tools
+        run: cargo binstall -y wasm-tools
 
       - name: http-server
         working-directory: _examples/http-server
@@ -51,11 +59,3 @@ jobs:
       # - name: http-client
       #   working-directory: _examples/http-client
       #   run: wash build
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: ${{ env.GOLANGCI_VERSION }}
