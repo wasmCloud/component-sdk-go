@@ -1,0 +1,8 @@
+output:
+  uniq-by-line: false
+  show-stats: true
+  sort-results: true
+  sort-order:
+    - linter
+    - severity
+    - file
