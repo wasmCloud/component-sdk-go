@@ -19,6 +19,11 @@ jobs:
       - uses: golangci/golangci-lint-action@v6
         with:
           version: ${{ env.GOLANGCI_VERSION }}
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Tools
+        run: |
+          cargo binstall -y wasm-tools
+
       - name: Go generate
         run: |
           go generate ./...
@@ -46,6 +51,10 @@ jobs:
         run: go test -v ./...
 
   examples:
+    strategy:
+      matrix:
+        example:
+          - http-server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -62,10 +71,16 @@ jobs:
           cargo binstall -y wasm-tools
           wash --version
 
-      - name: http-server
-        working-directory: _examples/http-server
-        run: wash build
+      - name: Go generate
+        working-directory: ${{ matrix.example }}
+        run: |
+          go generate ./...
+          if ! test -z "$(git status --porcelain)"; then
+            echo "Go generate modified files. Please run go generate and commit the changes."
+            git status
+            exit 1
+          fi
 
-      # - name: http-client
-      #   working-directory: _examples/http-client
-      #   run: wash build
+      - name: wash build
+        working-directory: ${{ matrix.example }}
+        run: wash build
