@@ -1,5 +1,7 @@
 # Go Component SDK
 
+[![Go Reference](https://pkg.go.dev/badge/go.wasmcloud.dev/component.svg)](https://pkg.go.dev/go.wasmcloud.dev/component)
+
 Warning: API stabilization in progress. Once ready it will be published as `v0.0.1`.
 
 The Go Component SDK provides a set of packages to simplify the development of WebAssembly components targeting the [wasmCloud](https://wasmcloud.com) host runtime.
