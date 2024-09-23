@@ -40,6 +40,9 @@ jobs:
         with:
           tinygo-version: ${{ env.TINYGO_VERSION }}
       - uses: wasmCloud/common-actions/install-wash@main
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Tools
+        run: cargo binstall wasm-tools
 
       - name: http-server
         working-directory: _examples/http-server
