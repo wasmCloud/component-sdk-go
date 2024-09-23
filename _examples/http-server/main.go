@@ -1,15 +1,21 @@
-package main
+//go:generate go run github.com/bytecodealliance/wasm-tools-go/cmd/wit-bindgen-go generate --world example --out gen ./wit
 
-//go:generate wit-bindgen-go generate --world example --out gen ./wit
+package main
 
 import (
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 
 	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net/wasihttp"
 )
+
+const Index = `/error - return a 500 error
+  /form - echo the fields of a POST request
+  /headers - echo your user agent back as a server side header
+  /post - echo the body of a POST request`
 
 func init() {
 	// We can't use http.ServeMux yet ( only symbol linking is supported in 'init' )
@@ -19,9 +25,9 @@ func init() {
 func entryHandler(w http.ResponseWriter, r *http.Request) {
 	logger := wasilog.ContextLogger("entryHandler")
 	handlers := map[string]http.HandlerFunc{
-		"/headers": headersHandler,
 		"/error":   errorHandler,
 		"/form":    formHandler,
+		"/headers": headersHandler,
 		"/post":    postHandler,
 	}
 
@@ -32,21 +38,15 @@ func entryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	index := `
-  /headers - echo your user agent back as a server side header
-  /error - return a 500 error
-  /form - echo the fields of a POST request
-  /post - echo the body of a POST request
-  `
-
 	var keys []string
 	for k := range handlers {
 		keys = append(keys, k)
 	}
+	sort.Strings(keys)
 	w.Header().Add("content-type", "text/plain")
 	w.Header().Add("X-Requested-Path", r.URL.Path)
 	w.Header().Add("X-Existing-Paths", strings.Join(keys, ","))
-	w.Write([]byte(index))
+	w.Write([]byte(Index))
 }
 
 func headersHandler(w http.ResponseWriter, r *http.Request) {
