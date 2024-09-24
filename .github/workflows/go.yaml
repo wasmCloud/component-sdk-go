@@ -54,6 +54,7 @@ jobs:
       matrix:
         example:
           - http-server
+          - http-client
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +64,10 @@ jobs:
       - uses: acifani/setup-tinygo@v2
         with:
           tinygo-version: ${{ env.TINYGO_VERSION }}
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.GOLANGCI_VERSION }}
+          working-directory: "_examples/${{ matrix.example }}"
       - uses: wasmCloud/common-actions/install-wash@main
       - uses: cargo-bins/cargo-binstall@main
       - name: Tools
@@ -83,3 +88,4 @@ jobs:
       - name: wash build
         working-directory: "_examples/${{ matrix.example }}"
         run: wash build
+
