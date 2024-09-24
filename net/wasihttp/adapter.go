@@ -230,31 +230,6 @@ func toHttpHeader(src types.Fields, dest *http.Header) {
 	}
 }
 
-// convert the IncomingRequest to http.Request
-func NewOutgoingHttpRequest(req *http.Request) (types.OutgoingRequest, error) {
-	headers := types.NewFields()
-	if err := toWasiHeader(req.Header, headers); err != nil {
-		return types.NewOutgoingRequest(headers), err
-	}
-
-	or := types.NewOutgoingRequest(headers)
-
-	or.SetAuthority(cm.Some(req.Host))
-	or.SetMethod(toWasiMethod(req.Method))
-	or.SetPathWithQuery(cm.Some(req.URL.Path + "?" + req.URL.Query().Encode()))
-
-	switch req.URL.Scheme {
-	case "http":
-		or.SetScheme(cm.Some(types.SchemeHTTP()))
-	case "https":
-		or.SetScheme(cm.Some(types.SchemeHTTPS()))
-	default:
-		or.SetScheme(cm.Some(types.SchemeOther(req.URL.Scheme)))
-	}
-
-	return or, nil
-}
-
 func toWasiHeader(src http.Header, dest types.Fields) error {
 	for k, v := range src {
 		key := types.FieldKey(k)

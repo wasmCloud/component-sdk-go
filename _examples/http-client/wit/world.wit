@@ -1,0 +1,5 @@
+package example:http-client;
+
+world example {
+  include wasmcloud:component/imports;
+}

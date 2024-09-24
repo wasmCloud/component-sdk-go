@@ -1,3 +1,6 @@
+run:
+  tests: false
+
 output:
   uniq-by-line: false
   show-stats: true

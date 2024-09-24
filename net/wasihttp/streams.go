@@ -15,11 +15,12 @@ import (
 type BodyConsumer interface {
 	Consume() (result cm.Result[types.IncomingBody, types.IncomingBody, struct{}])
 	Headers() (result types.Fields)
+	ResourceDrop()
 }
 
 type inputStreamReader struct {
 	consumer    BodyConsumer
-	body        types.IncomingBody
+	body        *types.IncomingBody
 	stream      streams.InputStream
 	trailerLock sync.Mutex
 	trailers    http.Header
@@ -29,21 +30,30 @@ type inputStreamReader struct {
 
 func (r *inputStreamReader) Close() error {
 	r.dropOnce.Do(func() {
+		Logger.Info("22 - CLOSING INPUT STREAM READER")
+		Logger.Info("22 - Dropping stream")
 		r.stream.ResourceDrop()
+		Logger.Info("22 - Dropping body")
+		r.body.ResourceDrop()
+		Logger.Info("22 - Dropping consumer")
+		r.consumer.ResourceDrop()
 	})
 
 	return nil
 }
 
 func (r *inputStreamReader) parseTrailers() {
+	Logger.Info("PARSING TRAILERS")
 	r.trailerLock.Lock()
 	defer r.trailerLock.Unlock()
 
 	// if we got this far, then we release ownership from body, otherwise it is our responsibility to drop it
-	r.dropOnce.Do(func() {})
+	r.dropOnce.Do(func() {
+		r.stream.ResourceDrop()
+	})
 
-	r.stream.ResourceDrop()
-	futureTrailers := types.IncomingBodyFinish(r.body)
+	futureTrailers := types.IncomingBodyFinish(*r.body)
+	defer futureTrailers.ResourceDrop()
 
 	trailersResult := futureTrailers.Get()
 
@@ -74,6 +84,7 @@ func (r *inputStreamReader) parseTrailers() {
 func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 	readResult := r.stream.BlockingRead(uint64(len(p)))
 	if err := readResult.Err(); err != nil {
+		Logger.Info("READ ERR", "err", err)
 		if err.Closed() {
 			r.trailerOnce.Do(r.parseTrailers)
 			return 0, io.EOF
@@ -83,51 +94,60 @@ func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 
 	readList := *readResult.OK()
 	copy(p, readList.Slice())
+	Logger.Info("READ RESULT", "amount", int(readList.Len()))
 	return int(readList.Len()), nil
 }
 
 func NewIncomingBodyTrailer(consumer BodyConsumer) (io.ReadCloser, http.Header, error) {
-	trailers := http.Header{}
 	consumeResult := consumer.Consume()
 	if consumeResult.IsErr() {
 		return nil, nil, errors.New("failed to consume incoming request")
 	}
-	body := *consumeResult.OK()
+
+	body := consumeResult.OK()
 	streamResult := body.Stream()
 	if streamResult.IsErr() {
 		return nil, nil, errors.New("failed to consume incoming request body stream")
 	}
+
+	stream := *streamResult.OK()
+	// NOTE(lxf): need at least one poll to get the body
+	poll := stream.Subscribe()
+	defer poll.ResourceDrop()
+	poll.Block()
+
+	trailers := http.Header{}
 	return &inputStreamReader{
 		consumer: consumer,
 		trailers: trailers,
 		body:     body,
-		stream:   *streamResult.OK(),
+		stream:   stream,
 	}, trailers, nil
 }
 
-type outputStreamReader struct {
-	body   types.OutgoingBody
-	stream streams.OutputStream
+type outgoingBody struct {
+	body   *types.OutgoingBody
+	stream *streams.OutputStream
 }
 
-func NewOutgoingBody(body types.OutgoingBody) (io.WriteCloser, error) {
+func NewOutgoingBody(body *types.OutgoingBody) (io.WriteCloser, error) {
 	stream := body.Write()
 	if stream.IsErr() {
 		return nil, errors.New("failed to acquire resource handle to request body")
 	}
-	return &outputStreamReader{
+	return &outgoingBody{
 		body:   body,
-		stream: *stream.OK(),
+		stream: stream.OK(),
 	}, nil
 }
 
-func (r *outputStreamReader) Close() error {
+func (r *outgoingBody) Close() error {
+	Logger.Info("Dropping stream")
 	r.stream.ResourceDrop()
-	r.body.ResourceDrop()
 	return nil
 }
 
-func (r *outputStreamReader) Write(p []byte) (n int, err error) {
+func (r *outgoingBody) Write(p []byte) (n int, err error) {
 	contents := cm.ToList(p)
 	writeResult := r.stream.BlockingWriteAndFlush(contents)
 	if err := writeResult.Err(); err != nil {
