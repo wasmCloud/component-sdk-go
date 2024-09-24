@@ -1,4 +1,4 @@
-//go:generate go run github.com/rvolosatovs/west/cmd/west-bindgen-go
+//go:generate go run github.com/wasmCloud/west/cmd/west-bindgen-go
 
 package main
 
@@ -10,10 +10,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/rvolosatovs/west"
-	_ "github.com/rvolosatovs/west/bindings"
-	"github.com/rvolosatovs/west/westhttp"
 	"github.com/stretchr/testify/assert"
+	"github.com/wasmCloud/west"
+	_ "github.com/wasmCloud/west/bindings"
+	"github.com/wasmCloud/west/westhttp"
 	incominghandler "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
 )
 
