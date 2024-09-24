@@ -10,15 +10,12 @@ import (
 	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	outgoinghandler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
-	"go.wasmcloud.dev/component/log/wasilog"
 )
 
 // Transport implements http.RoundTripper
 type Transport struct {
 	ConnectTimeout time.Duration
 }
-
-var Logger = wasilog.DefaultLogger
 
 var _ http.RoundTripper = (*Transport)(nil)
 
@@ -60,13 +57,13 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 	}
 
 	var adaptedBody io.WriteCloser
-	bodyRes := outRequest.Body()
-	if bodyRes.IsErr() {
-		return nil, fmt.Errorf("failed to acquire resource handle to request body: %s", bodyRes.Err())
-	}
-	body := bodyRes.OK()
-
+	var body *types.OutgoingBody
 	if incomingRequest.Body != nil {
+		bodyRes := outRequest.Body()
+		if bodyRes.IsErr() {
+			return nil, fmt.Errorf("failed to acquire resource handle to request body: %s", bodyRes.Err())
+		}
+		body = bodyRes.OK()
 		adaptedBody, err = NewOutgoingBody(body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to adapt body: %s", err)
@@ -79,34 +76,29 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 	}
 
 	// NOTE(lxf): If request includes a body, copy it to the adapted wasi body
-	if adaptedBody != nil {
-		Logger.Info("Proxying body")
+	if body != nil {
 		if _, err := io.Copy(adaptedBody, incomingRequest.Body); err != nil {
 			return nil, fmt.Errorf("failed to copy body: %v", err)
 		}
-	}
 
-	outTrailers := types.NewFields()
-	if err := toWasiHeader(incomingRequest.Trailer, outTrailers); err != nil {
-		return nil, err
-	}
+		outTrailers := types.NewFields()
+		if err := toWasiHeader(incomingRequest.Trailer, outTrailers); err != nil {
+			return nil, err
+		}
 
-	outFinish := types.OutgoingBodyFinish(*body, cm.Some(outTrailers))
-	if outFinish.IsErr() {
-		return nil, fmt.Errorf("failed to set trailer: %v", outFinish.Err())
+		outFinish := types.OutgoingBodyFinish(*body, cm.Some(outTrailers))
+		if outFinish.IsErr() {
+			return nil, fmt.Errorf("failed to set trailer: %v", outFinish.Err())
+		}
 	}
 
 	// NOTE(lxf): Request is fully sent. Processing response.
-	top := handleResp.OK()
-	defer top.ResourceDrop()
+	futureResponse := handleResp.OK()
 
 	// wait until resp is returned
-	subscription := top.Subscribe()
-	defer subscription.ResourceDrop()
+	futureResponse.Subscribe().Block()
 
-	subscription.Block()
-
-	pollableOption := top.Get()
+	pollableOption := futureResponse.Get()
 	if pollableOption.None() {
 		return nil, fmt.Errorf("incoming resp is None")
 	}
@@ -121,14 +113,16 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 		return nil, fmt.Errorf("%v", resultOption.Err())
 	}
 
-	incomingResponse := *resultOption.OK()
+	incomingResponse := resultOption.OK()
 	incomingBody, incomingTrailers, err := NewIncomingBodyTrailer(incomingResponse)
 	if err != nil {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}
 
 	incomingHeaders := http.Header{}
-	toHttpHeader(incomingResponse.Headers(), &incomingHeaders)
+	headers := incomingResponse.Headers()
+	toHttpHeader(headers, &incomingHeaders)
+	headers.ResourceDrop()
 
 	resp := &http.Response{
 		StatusCode: int(incomingResponse.Status()),

@@ -15,42 +15,39 @@ import (
 type BodyConsumer interface {
 	Consume() (result cm.Result[types.IncomingBody, types.IncomingBody, struct{}])
 	Headers() (result types.Fields)
-	ResourceDrop()
 }
 
 type inputStreamReader struct {
 	consumer    BodyConsumer
 	body        *types.IncomingBody
-	stream      streams.InputStream
+	stream      *streams.InputStream
 	trailerLock sync.Mutex
 	trailers    http.Header
 	trailerOnce sync.Once
-	dropOnce    sync.Once
 }
 
 func (r *inputStreamReader) Close() error {
-	r.dropOnce.Do(func() {
-		Logger.Info("22 - CLOSING INPUT STREAM READER")
-		Logger.Info("22 - Dropping stream")
+	r.trailerOnce.Do(r.parseTrailers)
+
+	if r.stream != nil {
 		r.stream.ResourceDrop()
-		Logger.Info("22 - Dropping body")
+	}
+
+	if r.body != nil {
 		r.body.ResourceDrop()
-		Logger.Info("22 - Dropping consumer")
-		r.consumer.ResourceDrop()
-	})
+		r.body = nil
+	}
 
 	return nil
 }
 
 func (r *inputStreamReader) parseTrailers() {
-	Logger.Info("PARSING TRAILERS")
 	r.trailerLock.Lock()
 	defer r.trailerLock.Unlock()
 
 	// if we got this far, then we release ownership from body, otherwise it is our responsibility to drop it
-	r.dropOnce.Do(func() {
-		r.stream.ResourceDrop()
-	})
+	r.stream.ResourceDrop()
+	r.stream = nil
 
 	futureTrailers := types.IncomingBodyFinish(*r.body)
 	defer futureTrailers.ResourceDrop()
@@ -82,9 +79,12 @@ func (r *inputStreamReader) parseTrailers() {
 }
 
 func (r *inputStreamReader) Read(p []byte) (n int, err error) {
-	readResult := r.stream.BlockingRead(uint64(len(p)))
+	pollable := r.stream.Subscribe()
+	pollable.Block()
+	pollable.ResourceDrop()
+
+	readResult := r.stream.Read(uint64(len(p)))
 	if err := readResult.Err(); err != nil {
-		Logger.Info("READ ERR", "err", err)
 		if err.Closed() {
 			r.trailerOnce.Do(r.parseTrailers)
 			return 0, io.EOF
@@ -94,7 +94,6 @@ func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 
 	readList := *readResult.OK()
 	copy(p, readList.Slice())
-	Logger.Info("READ RESULT", "amount", int(readList.Len()))
 	return int(readList.Len()), nil
 }
 
@@ -110,11 +109,7 @@ func NewIncomingBodyTrailer(consumer BodyConsumer) (io.ReadCloser, http.Header, 
 		return nil, nil, errors.New("failed to consume incoming request body stream")
 	}
 
-	stream := *streamResult.OK()
-	// NOTE(lxf): need at least one poll to get the body
-	poll := stream.Subscribe()
-	defer poll.ResourceDrop()
-	poll.Block()
+	stream := streamResult.OK()
 
 	trailers := http.Header{}
 	return &inputStreamReader{
@@ -142,7 +137,6 @@ func NewOutgoingBody(body *types.OutgoingBody) (io.WriteCloser, error) {
 }
 
 func (r *outgoingBody) Close() error {
-	Logger.Info("Dropping stream")
 	r.stream.ResourceDrop()
 	return nil
 }

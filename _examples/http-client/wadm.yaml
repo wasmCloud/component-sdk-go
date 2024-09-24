@@ -9,7 +9,7 @@ metadata:
     wasmcloud.dev/readme-md-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/rust/components/http-image-processor/README.md
     wasmcloud.dev/homepage: https://github.com/wasmCloud/wasmCloud/tree/main/examples/rust/components/http-image-processor
     wasmcloud.dev/categories: |
-      http,http-server,rust,hello-world,example
+      http,http-client,rust,hello-world,example
 spec:
   components:
     - name: http-component
@@ -40,7 +40,7 @@ spec:
             source_config:
               - name: default-http
                 properties:
-                  address: 0.0.0.0:30000
+                  address: 0.0.0.0:30001
     - name: httpclient
       type: capability
       properties:

@@ -114,6 +114,7 @@ func (row *responseOutparamWriter) Close() error {
 
 	row.stream.BlockingFlush()
 	row.stream.ResourceDrop()
+	row.stream = nil
 
 	var maybeTrailers cm.Option[types.Fields]
 	wasiTrailers := types.NewFields()
@@ -188,7 +189,9 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 	}
 	req.Trailer = trailers
 
-	toHttpHeader(ir.Headers(), &req.Header)
+	headers := ir.Headers()
+	toHttpHeader(headers, &req.Header)
+	headers.ResourceDrop()
 
 	req.Host = authority
 	req.URL.Host = authority
