@@ -1,5 +1,6 @@
 run:
   tests: false
+  modules-download-mode: readonly
 
 output:
   uniq-by-line: false
@@ -97,6 +98,4 @@ linters-settings:
     # List of words to ignore
     # among the one defined in https://github.com/golangci/misspell/blob/master/words.go
     ignore-words:
-    #  - valor
-    #  - and
-
+      - WASM

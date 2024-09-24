@@ -30,7 +30,7 @@ func HandleFunc(h http.HandlerFunc) {
 }
 
 func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutparam) {
-	httpReq, err := NewHttpRequest(request)
+	httpReq, err := WASItoHTTPRequest(request)
 	if err != nil {
 		types.ResponseOutparamSet(responseOut, cm.Err[cm.Result[types.ErrorCodeShape, types.OutgoingResponse, types.ErrorCode]](
 			types.ErrorCodeInternalError(cm.Some(err.Error()))),
@@ -41,7 +41,7 @@ func wasiHandle(request types.IncomingRequest, responseOut types.ResponseOutpara
 		defer httpReq.Body.Close()
 	}
 
-	httpRes := NewHttpResponseWriter(responseOut)
+	httpRes := WASItoHTTPResponseWriter(responseOut)
 	defer httpRes.Close()
 
 	handler(httpRes, httpReq)

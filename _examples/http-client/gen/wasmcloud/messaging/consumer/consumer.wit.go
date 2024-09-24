@@ -5,7 +5,7 @@ package consumer
 
 import (
 	"github.com/bytecodealliance/wasm-tools-go/cm"
-	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasmcloud/messaging/types"
+	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasmcloud/messaging/types"
 )
 
 // Request represents the imported function "request".

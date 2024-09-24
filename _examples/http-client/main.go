@@ -18,7 +18,7 @@ func init() {
 	wasihttp.HandleFunc(proxyHandler)
 }
 
-func proxyHandler(w http.ResponseWriter, r *http.Request) {
+func proxyHandler(w http.ResponseWriter, _ *http.Request) {
 	url := "http://www.randomnumberapi.com/api/v1.0/random?min=100&max=1000&count=5"
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -36,6 +36,6 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Custom-Header", "proxied")
 	w.WriteHeader(resp.StatusCode)
 
-	io.Copy(w, resp.Body)
+	_, _ = io.Copy(w, resp.Body)
 }
 func main() {}

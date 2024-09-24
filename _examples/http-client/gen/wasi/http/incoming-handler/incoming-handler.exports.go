@@ -3,7 +3,7 @@
 package incominghandler
 
 import (
-	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/http/types"
+	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasi/http/types"
 )
 
 // Exports represents the caller-defined exports from "wasi:http/incoming-handler@0.2.0".

@@ -5,7 +5,7 @@ package reveal
 
 import (
 	"github.com/bytecodealliance/wasm-tools-go/cm"
-	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasmcloud/secrets/store"
+	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasmcloud/secrets/store"
 )
 
 // Reveal represents the imported function "reveal".

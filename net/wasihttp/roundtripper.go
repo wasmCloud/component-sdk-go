@@ -37,7 +37,7 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 	var err error
 
 	outHeaders := types.NewFields()
-	if err := toWasiHeader(incomingRequest.Header, outHeaders); err != nil {
+	if err := HTTPtoWASIHeader(incomingRequest.Header, outHeaders); err != nil {
 		return nil, err
 	}
 
@@ -82,7 +82,7 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 		}
 
 		outTrailers := types.NewFields()
-		if err := toWasiHeader(incomingRequest.Trailer, outTrailers); err != nil {
+		if err := HTTPtoWASIHeader(incomingRequest.Trailer, outTrailers); err != nil {
 			return nil, err
 		}
 
@@ -121,7 +121,7 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 
 	incomingHeaders := http.Header{}
 	headers := incomingResponse.Headers()
-	toHttpHeader(headers, &incomingHeaders)
+	WASItoHTTPHeader(headers, &incomingHeaders)
 	headers.ResourceDrop()
 
 	resp := &http.Response{

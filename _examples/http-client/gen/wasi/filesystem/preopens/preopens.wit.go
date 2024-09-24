@@ -5,7 +5,7 @@ package preopens
 
 import (
 	"github.com/bytecodealliance/wasm-tools-go/cm"
-	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/filesystem/types"
+	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasi/filesystem/types"
 )
 
 // GetDirectories represents the imported function "get-directories".
