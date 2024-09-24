@@ -1,0 +1,8 @@
+package example:http-client;
+
+world example {
+  include wasmcloud:component/imports;
+
+  import wasi:http/outgoing-handler@0.2.0;
+  export wasi:http/incoming-handler@0.2.0;
+}

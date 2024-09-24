@@ -11,11 +11,11 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )
 
-var _ http.ResponseWriter = (*responseOutparamWriter)(nil)
+var _ http.ResponseWriter = (*ResponseOutparamWriter)(nil)
 
 type IncomingRequest = types.IncomingRequest
 
-type responseOutparamWriter struct {
+type ResponseOutparamWriter struct {
 	outparam    types.ResponseOutparam
 	response    types.OutgoingResponse
 	wasiHeaders types.Fields
@@ -29,11 +29,11 @@ type responseOutparamWriter struct {
 	statuscode int
 }
 
-func (row *responseOutparamWriter) Header() http.Header {
+func (row *ResponseOutparamWriter) Header() http.Header {
 	return row.httpHeaders
 }
 
-func (row *responseOutparamWriter) Write(buf []byte) (int, error) {
+func (row *ResponseOutparamWriter) Write(buf []byte) (int, error) {
 	// NOTE(lxf): If this is the first write, make sure we set the headers/statuscode
 	row.headerOnce.Do(row.reconcile)
 	if row.headerErr != nil {
@@ -55,7 +55,7 @@ func (row *responseOutparamWriter) Write(buf []byte) (int, error) {
 	return int(contents.Len()), nil
 }
 
-func (row *responseOutparamWriter) WriteHeader(statusCode int) {
+func (row *ResponseOutparamWriter) WriteHeader(statusCode int) {
 	row.headerOnce.Do(func() {
 		row.statuscode = statusCode
 		row.reconcile()
@@ -63,7 +63,7 @@ func (row *responseOutparamWriter) WriteHeader(statusCode int) {
 }
 
 // reconcile headers from go to wasi
-func (row *responseOutparamWriter) reconcileHeaders() error {
+func (row *ResponseOutparamWriter) reconcileHeaders() error {
 	for key, vals := range row.httpHeaders {
 		fieldVals := []types.FieldValue{}
 		for _, val := range vals {
@@ -81,7 +81,7 @@ func (row *responseOutparamWriter) reconcileHeaders() error {
 	return nil
 }
 
-func (row *responseOutparamWriter) reconcile() {
+func (row *ResponseOutparamWriter) reconcile() {
 	if row.headerErr = row.reconcileHeaders(); row.headerErr != nil {
 		return
 	}
@@ -107,13 +107,14 @@ func (row *responseOutparamWriter) reconcile() {
 	types.ResponseOutparamSet(row.outparam, result)
 }
 
-func (row *responseOutparamWriter) Close() error {
+func (row *ResponseOutparamWriter) Close() error {
 	if row.stream == nil {
 		return nil
 	}
 
 	row.stream.BlockingFlush()
 	row.stream.ResourceDrop()
+	row.stream = nil
 
 	var maybeTrailers cm.Option[types.Fields]
 	wasiTrailers := types.NewFields()
@@ -141,8 +142,8 @@ func (row *responseOutparamWriter) Close() error {
 }
 
 // convert the ResponseOutparam to http.ResponseWriter
-func NewHttpResponseWriter(out types.ResponseOutparam) *responseOutparamWriter {
-	return &responseOutparamWriter{
+func WASItoHTTPResponseWriter(out types.ResponseOutparam) *ResponseOutparamWriter {
+	return &ResponseOutparamWriter{
 		outparam:    out,
 		httpHeaders: http.Header{},
 		wasiHeaders: types.NewFields(),
@@ -151,7 +152,7 @@ func NewHttpResponseWriter(out types.ResponseOutparam) *responseOutparamWriter {
 }
 
 // convert the IncomingRequest to http.Request
-func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
+func WASItoHTTPRequest(ir IncomingRequest) (req *http.Request, err error) {
 	method, err := methodToString(ir.Method())
 	if err != nil {
 		return nil, err
@@ -188,7 +189,9 @@ func NewHttpRequest(ir IncomingRequest) (req *http.Request, err error) {
 	}
 	req.Trailer = trailers
 
-	toHttpHeader(ir.Headers(), &req.Header)
+	headers := ir.Headers()
+	WASItoHTTPHeader(headers, &req.Header)
+	headers.ResourceDrop()
 
 	req.Host = authority
 	req.URL.Host = authority
@@ -222,7 +225,7 @@ func methodToString(m types.Method) (string, error) {
 	return "", fmt.Errorf("failed to convert http method")
 }
 
-func toHttpHeader(src types.Fields, dest *http.Header) {
+func WASItoHTTPHeader(src types.Fields, dest *http.Header) {
 	for _, f := range src.Entries().Slice() {
 		key := string(f.F0)
 		value := string(cm.List[uint8](f.F1).Slice())
@@ -230,32 +233,7 @@ func toHttpHeader(src types.Fields, dest *http.Header) {
 	}
 }
 
-// convert the IncomingRequest to http.Request
-func NewOutgoingHttpRequest(req *http.Request) (types.OutgoingRequest, error) {
-	headers := types.NewFields()
-	if err := toWasiHeader(req.Header, headers); err != nil {
-		return types.NewOutgoingRequest(headers), err
-	}
-
-	or := types.NewOutgoingRequest(headers)
-
-	or.SetAuthority(cm.Some(req.Host))
-	or.SetMethod(toWasiMethod(req.Method))
-	or.SetPathWithQuery(cm.Some(req.URL.Path + "?" + req.URL.Query().Encode()))
-
-	switch req.URL.Scheme {
-	case "http":
-		or.SetScheme(cm.Some(types.SchemeHTTP()))
-	case "https":
-		or.SetScheme(cm.Some(types.SchemeHTTPS()))
-	default:
-		or.SetScheme(cm.Some(types.SchemeOther(req.URL.Scheme)))
-	}
-
-	return or, nil
-}
-
-func toWasiHeader(src http.Header, dest types.Fields) error {
+func HTTPtoWASIHeader(src http.Header, dest types.Fields) error {
 	for k, v := range src {
 		key := types.FieldKey(k)
 		fieldVals := []types.FieldValue{}

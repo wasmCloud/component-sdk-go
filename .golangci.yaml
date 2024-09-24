@@ -1,3 +1,7 @@
+run:
+  tests: false
+  modules-download-mode: readonly
+
 output:
   uniq-by-line: false
   show-stats: true
@@ -10,8 +14,7 @@ output:
 linters:
   enable:
     - gofmt
-    # TODO(lxf): enable once we are ready to start releasing
-    #- revive
+    - revive
     - thelper
     - mirror
     - usestdlibvars
@@ -95,5 +98,4 @@ linters-settings:
     # List of words to ignore
     # among the one defined in https://github.com/golangci/misspell/blob/master/words.go
     ignore-words:
-    #  - valor
-    #  - and
+      - WASM

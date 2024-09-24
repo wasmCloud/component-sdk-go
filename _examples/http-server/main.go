@@ -46,16 +46,16 @@ func entryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("content-type", "text/plain")
 	w.Header().Add("X-Requested-Path", r.URL.Path)
 	w.Header().Add("X-Existing-Paths", strings.Join(keys, ","))
-	w.Write([]byte(Index))
+	_, _ = w.Write([]byte(Index))
 }
 
 func headersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("X-Your-User-Agent", r.Header.Get("User-Agent"))
 
-	w.Write([]byte("Check headers!"))
+	_, _ = w.Write([]byte("Check headers!"))
 }
 
-func errorHandler(w http.ResponseWriter, r *http.Request) {
+func errorHandler(w http.ResponseWriter, _ *http.Request) {
 	http.Error(w, "Something went wrong", http.StatusInternalServerError)
 }
 
@@ -66,7 +66,7 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for key, values := range r.Form {
-		w.Write([]byte(key + ": " + strings.Join(values, ",") + "\n"))
+		_, _ = w.Write([]byte(key + ": " + strings.Join(values, ",") + "\n"))
 	}
 }
 

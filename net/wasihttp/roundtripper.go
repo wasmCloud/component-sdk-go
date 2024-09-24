@@ -33,52 +33,72 @@ func (r *Transport) requestOptions() types.RequestOptions {
 	return options
 }
 
-func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	or, err := NewOutgoingHttpRequest(req)
-	if err != nil {
+func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, error) {
+	var err error
+
+	outHeaders := types.NewFields()
+	if err := HTTPtoWASIHeader(incomingRequest.Header, outHeaders); err != nil {
 		return nil, err
 	}
 
+	outRequest := types.NewOutgoingRequest(outHeaders)
+
+	outRequest.SetAuthority(cm.Some(incomingRequest.Host))
+	outRequest.SetMethod(toWasiMethod(incomingRequest.Method))
+	outRequest.SetPathWithQuery(cm.Some(incomingRequest.URL.Path + "?" + incomingRequest.URL.Query().Encode()))
+
+	switch incomingRequest.URL.Scheme {
+	case "http":
+		outRequest.SetScheme(cm.Some(types.SchemeHTTP()))
+	case "https":
+		outRequest.SetScheme(cm.Some(types.SchemeHTTPS()))
+	default:
+		outRequest.SetScheme(cm.Some(types.SchemeOther(incomingRequest.URL.Scheme)))
+	}
+
 	var adaptedBody io.WriteCloser
-	var body types.OutgoingBody
-	if req.Body != nil {
-		bodyRes := or.Body()
+	var body *types.OutgoingBody
+	if incomingRequest.Body != nil {
+		bodyRes := outRequest.Body()
 		if bodyRes.IsErr() {
 			return nil, fmt.Errorf("failed to acquire resource handle to request body: %s", bodyRes.Err())
 		}
-
-		body = *bodyRes.OK()
-
+		body = bodyRes.OK()
 		adaptedBody, err = NewOutgoingBody(body)
 		if err != nil {
 			return nil, fmt.Errorf("failed to adapt body: %s", err)
 		}
 	}
 
-	handleResp := outgoinghandler.Handle(or, cm.Some(r.requestOptions()))
+	handleResp := outgoinghandler.Handle(outRequest, cm.Some(r.requestOptions()))
 	if handleResp.Err() != nil {
 		return nil, fmt.Errorf("%v", handleResp.Err())
 	}
 
-	if adaptedBody != nil {
-		if _, err := io.Copy(adaptedBody, req.Body); err != nil {
-			return nil, fmt.Errorf("failed to copy body: %s", err)
+	// NOTE(lxf): If request includes a body, copy it to the adapted wasi body
+	if body != nil {
+		if _, err := io.Copy(adaptedBody, incomingRequest.Body); err != nil {
+			return nil, fmt.Errorf("failed to copy body: %v", err)
 		}
 
-		trailers := types.NewFields()
-		if err := toWasiHeader(req.Trailer, trailers); err != nil {
+		outTrailers := types.NewFields()
+		if err := HTTPtoWASIHeader(incomingRequest.Trailer, outTrailers); err != nil {
 			return nil, err
 		}
-		types.OutgoingBodyFinish(body, cm.Some(trailers))
+
+		outFinish := types.OutgoingBodyFinish(*body, cm.Some(outTrailers))
+		if outFinish.IsErr() {
+			return nil, fmt.Errorf("failed to set trailer: %v", outFinish.Err())
+		}
 	}
 
-	top := *handleResp.OK()
-	// wait until resp is returned
-	subscription := top.Subscribe()
-	subscription.Block()
-	subscription.ResourceDrop()
+	// NOTE(lxf): Request is fully sent. Processing response.
+	futureResponse := handleResp.OK()
 
-	pollableOption := top.Get()
+	// wait until resp is returned
+	futureResponse.Subscribe().Block()
+
+	pollableOption := futureResponse.Get()
 	if pollableOption.None() {
 		return nil, fmt.Errorf("incoming resp is None")
 	}
@@ -93,16 +113,24 @@ func (r *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, fmt.Errorf("%v", resultOption.Err())
 	}
 
-	incomingBodyTrailer := *resultOption.OK()
-	respBody, trailers, err := NewIncomingBodyTrailer(incomingBodyTrailer)
+	incomingResponse := resultOption.OK()
+	incomingBody, incomingTrailers, err := NewIncomingBodyTrailer(incomingResponse)
 	if err != nil {
 		return nil, fmt.Errorf("failed to consume incoming request %s", err)
 	}
 
+	incomingHeaders := http.Header{}
+	headers := incomingResponse.Headers()
+	WASItoHTTPHeader(headers, &incomingHeaders)
+	headers.ResourceDrop()
+
 	resp := &http.Response{
-		StatusCode: int(incomingBodyTrailer.Status()),
-		Body:       respBody,
-		Trailer:    trailers,
+		StatusCode: int(incomingResponse.Status()),
+		Status:     http.StatusText(int(incomingResponse.Status())),
+		Request:    incomingRequest,
+		Header:     incomingHeaders,
+		Body:       incomingBody,
+		Trailer:    incomingTrailers,
 	}
 
 	return resp, nil
