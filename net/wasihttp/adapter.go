@@ -242,7 +242,6 @@ func HTTPtoWASIHeader(src http.Header, dest types.Fields) error {
 			fieldVals = append(fieldVals, types.FieldValue(cm.ToList([]uint8(val))))
 		}
 
-		// TODO(rjindal): check error
 		res := dest.Set(key, cm.ToList(fieldVals))
 		if res.IsErr() {
 			return fmt.Errorf("failed to set header %s: %s", k, res.Err())
