@@ -25,6 +25,8 @@ func Handle(h http.Handler) {
 	handler = h.ServeHTTP
 }
 
+// HandleFunc sets the [net/http.HandlerFunc] that will be called to handle the
+// incoming request.
 func HandleFunc(h http.HandlerFunc) {
 	handler = h
 }

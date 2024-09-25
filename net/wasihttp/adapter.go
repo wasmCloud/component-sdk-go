@@ -13,8 +13,14 @@ import (
 
 var _ http.ResponseWriter = (*ResponseOutparamWriter)(nil)
 
+// IncomingRequest represents an incoming HTTP request as defined in [wasi:http/types.incoming-request]
+//
+// [wasi:http/types.incoming-request]: https://github.com/WebAssembly/wasi-http/blob/v0.2.0/wit/types.wit#L220-L248
 type IncomingRequest = types.IncomingRequest
 
+// ResponseOutparamWriter implements a [net/http.ResponseWriter] for [wasi:http]
+//
+// [wasi:http]: https://github.com/WebAssembly/wasi-http/tree/v0.2.0
 type ResponseOutparamWriter struct {
 	outparam    types.ResponseOutparam
 	response    types.OutgoingResponse
@@ -29,10 +35,12 @@ type ResponseOutparamWriter struct {
 	statuscode int
 }
 
+// Header returns the header map that will be sent by [ResponseOutparamWriter.WriteHeader].
 func (row *ResponseOutparamWriter) Header() http.Header {
 	return row.httpHeaders
 }
 
+// Write writes the data to the connection as part of an HTTP reply.
 func (row *ResponseOutparamWriter) Write(buf []byte) (int, error) {
 	// NOTE(lxf): If this is the first write, make sure we set the headers/statuscode
 	row.headerOnce.Do(row.reconcile)
@@ -55,6 +63,8 @@ func (row *ResponseOutparamWriter) Write(buf []byte) (int, error) {
 	return int(contents.Len()), nil
 }
 
+// WriteHeader sends an HTTP response header with the provided
+// status code.
 func (row *ResponseOutparamWriter) WriteHeader(statusCode int) {
 	row.headerOnce.Do(func() {
 		row.statuscode = statusCode
@@ -107,6 +117,8 @@ func (row *ResponseOutparamWriter) reconcile() {
 	types.ResponseOutparamSet(row.outparam, result)
 }
 
+// Close closes out the underlying stream by flushing the response and making
+// sure that the underlying resource handle is dropped.
 func (row *ResponseOutparamWriter) Close() error {
 	if row.stream == nil {
 		return nil
@@ -141,7 +153,10 @@ func (row *ResponseOutparamWriter) Close() error {
 	return nil
 }
 
-// convert the ResponseOutparam to http.ResponseWriter
+// WASItoHTTPResponseWriter takes a [types.ResponseOutparam] representing [wasi:http/types.response-outparam]
+// and instantiates a new [ResponseOutparamWriter] for writing to it.
+//
+// [wasi:http/types.response-outparam]: https://github.com/WebAssembly/wasi-http/blob/v0.2.0/wit/types.wit#L352-L372
 func WASItoHTTPResponseWriter(out types.ResponseOutparam) *ResponseOutparamWriter {
 	return &ResponseOutparamWriter{
 		outparam:    out,
@@ -151,7 +166,7 @@ func WASItoHTTPResponseWriter(out types.ResponseOutparam) *ResponseOutparamWrite
 	}
 }
 
-// convert the IncomingRequest to http.Request
+// WASItoHTTPRequest takes an [IncomingRequest] and returns a [net/http.Request] representation of it.
 func WASItoHTTPRequest(ir IncomingRequest) (req *http.Request, err error) {
 	method, err := methodToString(ir.Method())
 	if err != nil {
@@ -225,6 +240,7 @@ func methodToString(m types.Method) (string, error) {
 	return "", fmt.Errorf("failed to convert http method")
 }
 
+// WASItoHTTPHeader takes a [types.Fields] and copies them to the provided [net/http.Header] map.
 func WASItoHTTPHeader(src types.Fields, dest *http.Header) {
 	for _, f := range src.Entries().Slice() {
 		key := string(f.F0)
@@ -233,6 +249,7 @@ func WASItoHTTPHeader(src types.Fields, dest *http.Header) {
 	}
 }
 
+// HTTPtoWASIHeader takes a [net/http.Header] map and copies them to the provided [types.Fields].
 func HTTPtoWASIHeader(src http.Header, dest types.Fields) error {
 	for k, v := range src {
 		key := types.FieldKey(k)

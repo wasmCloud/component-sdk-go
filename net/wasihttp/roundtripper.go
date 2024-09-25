@@ -12,20 +12,25 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
 
-// Transport implements http.RoundTripper
+// Transport implements [http.RoundTripper] for [wasi:http].
+//
+// [wasi:http]: https://github.com/WebAssembly/wasi-http/tree/v0.2.0
 type Transport struct {
 	ConnectTimeout time.Duration
 }
 
 var _ http.RoundTripper = (*Transport)(nil)
 
-var (
-	DefaultTransport = &Transport{
-		// NOTE(lxf): Same as stdlib http.Transport
-		ConnectTimeout: 30 * time.Second,
-	}
-	DefaultClient = &http.Client{Transport: DefaultTransport}
-)
+// DefaultTransport is the default implementation of [Transport] and is used by [DefaultClient].
+// It is configured use the same timeout value as [net/http.DefaultTransport].
+var DefaultTransport = &Transport{
+	ConnectTimeout: 30 * time.Second, // NOTE(lxf): Same as stdlib http.Transport
+}
+
+// DefaultClient is the default [net/http.Client] that uses [DefaultTransport] to adapt [net/http] to [wasi:http].
+//
+// [wasi:http]: https://github.com/WebAssembly/wasi-http/tree/v0.2.0
+var DefaultClient = &http.Client{Transport: DefaultTransport}
 
 func (r *Transport) requestOptions() types.RequestOptions {
 	options := types.NewRequestOptions()
@@ -33,6 +38,7 @@ func (r *Transport) requestOptions() types.RequestOptions {
 	return options
 }
 
+// RoundTrip implements the [net/http.RoundTripper] interface.
 func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, error) {
 	var err error
 

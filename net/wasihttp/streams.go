@@ -12,6 +12,12 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )
 
+// BodyConsumer interface is implemented by [types.IncomingRequest] and [types.IncomingResponse].
+// It enables the consumption of [wasi:http/types.incoming-request] and [wasi:http/types.incoming-request]
+//
+// [wasi:http/types.incoming-request]: https://github.com/WebAssembly/wasi-http/blob/v0.2.0/wit/types.wit#L220-L248
+//
+// [wasi:http/types.incoming-request]: https://github.com/WebAssembly/wasi-http/blob/v0.2.0/wit/types.wit#L377-L395
 type BodyConsumer interface {
 	Consume() (result cm.Result[types.IncomingBody, types.IncomingBody, struct{}])
 	Headers() (result types.Fields)
@@ -97,6 +103,7 @@ func (r *inputStreamReader) Read(p []byte) (n int, err error) {
 	return int(readList.Len()), nil
 }
 
+// NewIncomingBodyTrailer takes a [BodyConsumer] and parses it into corresponding [io.ReadCloser] and [net/http.Header].
 func NewIncomingBodyTrailer(consumer BodyConsumer) (io.ReadCloser, http.Header, error) {
 	consumeResult := consumer.Consume()
 	if consumeResult.IsErr() {
@@ -125,6 +132,7 @@ type outgoingBody struct {
 	stream *streams.OutputStream
 }
 
+// NewOutgoingBody takes a [types.OutgoingBody] and returns a [io.WriteCloser] encapsulating it.
 func NewOutgoingBody(body *types.OutgoingBody) (io.WriteCloser, error) {
 	stream := body.Write()
 	if stream.IsErr() {
