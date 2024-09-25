@@ -10,8 +10,12 @@ import (
 	"go.wasmcloud.dev/component/gen/wasi/logging/logging"
 )
 
+// DefaultLogger is the default implementation that adapts the [wasi:logging] interface to a [slog.Handler].
+//
+// [wasi:logging]: https://github.com/WebAssembly/wasi-logging
 var DefaultLogger = slog.New(DefaultOptions().NewHandler())
 
+// ContextLogger returns a [DefaultLogger] implementation that has an additional "wasi-context" [slog.Attr] attached to it.
 func ContextLogger(wasiContext string) *slog.Logger {
 	return DefaultLogger.With(ContextAttr(wasiContext))
 }
@@ -22,6 +26,7 @@ func (k contextKey) String() string {
 	return string(k)
 }
 
+// ContextKey is a predefined key used to track the wasi
 const ContextKey = contextKey("wasi-context")
 
 func ContextAttr(name string) slog.Attr {
@@ -30,6 +35,7 @@ func ContextAttr(name string) slog.Attr {
 
 type wasmLoggerFunc func(level logging.Level, context string, message string)
 
+// WasiLoggingOption represents the available options for customizing the [WebassemblyHandler].
 type WasiLoggingOption struct {
 	// required: log function
 	LoggerFunc wasmLoggerFunc
@@ -43,6 +49,7 @@ type WasiLoggingOption struct {
 	ReplaceAttr func(groups []string, a slog.Attr) slog.Attr
 }
 
+// WebassemblyHandler implements the [slog.Handler] interface to adapt [slog] to wasi:logging.
 type WebassemblyHandler struct {
 	option WasiLoggingOption
 	attrs  []slog.Attr
@@ -104,6 +111,7 @@ func wasiConverter(replaceAttr func(groups []string, a slog.Attr) slog.Attr, log
 	return strings.Join(formattedAttrs, " "), context
 }
 
+// DefaultOptions represents the default set of values used in [WasiLoggingOption] that are used in setting up [DefaultLogger].
 func DefaultOptions() WasiLoggingOption {
 	return WasiLoggingOption{
 		LoggerFunc: logging.Log,
@@ -129,16 +137,19 @@ func DefaultOptions() WasiLoggingOption {
 	}
 }
 
+// NewHandler is used to instantiate a new instance of a [WebassemblyHandler] that implements the [slog.Handler] interface.
 func (o WasiLoggingOption) NewHandler() slog.Handler {
 	return &WebassemblyHandler{
 		option: o,
 	}
 }
 
+// Enabled reports whether the handler handles records at the given level. The handler ignores records whose level is lower.
 func (h *WebassemblyHandler) Enabled(_ context.Context, level slog.Level) bool {
 	return level >= h.option.Level.Level()
 }
 
+// Handle formats its argument [slog.Record] using the provided [context.Context] into a wasi:logging compatible output.
 func (h *WebassemblyHandler) Handle(ctx context.Context, record slog.Record) error {
 	fromContext := slogcommon.ContextExtractor(ctx, h.option.AttrFromContext)
 	message, logContext := wasiConverter(h.option.ReplaceAttr, append(h.attrs, fromContext...), h.groups, &record)
@@ -148,6 +159,8 @@ func (h *WebassemblyHandler) Handle(ctx context.Context, record slog.Record) err
 	return nil
 }
 
+// WithAttrs returns a new [WebAssemblyHandler] whose attributes consists
+// of h's attributes followed by attrs.
 func (h *WebassemblyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &WebassemblyHandler{
 		option: h.option,
@@ -156,6 +169,8 @@ func (h *WebassemblyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	}
 }
 
+// WithGroups returns a new [WebassemblyHandler] where the attributes are
+// grouped under a common name.
 func (h *WebassemblyHandler) WithGroup(name string) slog.Handler {
 	// https://cs.opensource.google/go/x/exp/+/46b07846:slog/handler.go;l=247
 	if name == "" {
