@@ -7,6 +7,8 @@ import (
 	"go.wasmcloud.dev/component/gen/wasmcloud/secrets/store"
 )
 
+// SecretGetAndReveal attempts to access a secret identified by the provided key
+// and reveal it, returning the stored value as a slice of bytes.
 func SecretGetAndReveal(key string) ([]byte, error) {
 	res := store.Get(key)
 	if res.IsErr() {
