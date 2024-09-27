@@ -1,0 +1,21 @@
+apiVersion: core.oam.dev/v1beta1
+kind: Application
+metadata:
+  name: invoke-example
+  annotations:
+    description: All-in-one demo
+    wasmcloud.dev/authors: wasmCloud team
+    wasmcloud.dev/source-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/rust/components/http-image-processor/wadm.yaml
+    wasmcloud.dev/readme-md-url: https://github.com/wasmCloud/wasmCloud/blob/main/examples/rust/components/http-image-processor/README.md
+    wasmcloud.dev/homepage: https://github.com/wasmCloud/wasmCloud/tree/main/examples/rust/components/http-image-processor
+    wasmcloud.dev/categories: go,hello-world,example
+spec:
+  components:
+    - name: invoker
+      type: component
+      properties:
+        image: file://./build/invoke_s.wasm
+      traits:
+        - type: spreadscaler
+          properties:
+            replicas: 1
