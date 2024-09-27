@@ -1,5 +1,5 @@
-github.com/bytecodealliance/wasm-tools-go v0.2.0 h1:JdmiZew7ewHjf+ZGGRE4gZM85Ad/PGW/5I57hepEOjQ=
-github.com/bytecodealliance/wasm-tools-go v0.2.0/go.mod h1:2GnJCUlcDrslZ/L6+yYqoUnewDlBvqRS2N/0NW9ro6w=
+github.com/bytecodealliance/wasm-tools-go v0.2.1 h1:0o+zGdbgOcam4ZNA8NPS5Xxl1FV57XTeLerOJy4EVsY=
+github.com/bytecodealliance/wasm-tools-go v0.2.1/go.mod h1:+h2zz8UoMx8l1F1b2pv6LCbZFc85HFQZDQcRdfa4ovs=
 github.com/coreos/go-semver v0.3.1 h1:yi21YpKnrx1gt5R+la8n5WgS0kCrsPp33dmEyHReZr4=
 github.com/coreos/go-semver v0.3.1/go.mod h1:irMmmIw/7yzSRPWryHsK7EYSg09caPQL03VsM8rvUec=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
@@ -18,8 +18,8 @@ github.com/urfave/cli/v3 v3.0.0-alpha9 h1:P0RMy5fQm1AslQS+XCmy9UknDXctOmG/q/FZkU
 github.com/urfave/cli/v3 v3.0.0-alpha9/go.mod h1:0kK/RUFHyh+yIKSfWxwheGndfnrvYSmYFVeKCh03ZUc=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGCjxCBTO/36wtF6j2nSip77qHd4x4=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBiLI6FVj/9LpzZWtj1/D6lUovWYBkxHVV3aM=
-go.wasmcloud.dev/wadge v0.4.1 h1:ALqkeC0eGTXVXgFtD9tatq+RHYlFLxduy+TTdirHNv0=
-go.wasmcloud.dev/wadge v0.4.1/go.mod h1:eBW4rF7xK3jpk+NX7vRxNJXAzo1L29nb/jguwDisXr0=
+go.wasmcloud.dev/wadge v0.5.0 h1:MQQN3fN9K0ntw214KEPryH5/8ZUQx9jOY3rnYuIyZpY=
+go.wasmcloud.dev/wadge v0.5.0/go.mod h1:BkAxt9wF08UWbRYblfxbTtupn0rQLtsgTKeu22SBGRg=
 golang.org/x/mod v0.21.0 h1:vvrHzRwRfVKSiLrG+d4FMl/Qi4ukBCE6kZlTUkDYRT0=
 golang.org/x/mod v0.21.0/go.mod h1:6SkKJ3Xj0I0BrPOZoBy3bdMptDDU9oJrpohJ3eWZ1fY=
 golang.org/x/sync v0.8.0 h1:3NFvSEYkUoMifnESzZl15y791HH1qU2xm6eCJU5ZPXQ=

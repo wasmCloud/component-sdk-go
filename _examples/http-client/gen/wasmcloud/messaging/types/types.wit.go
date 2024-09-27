@@ -19,6 +19,7 @@ import (
 //		reply-to: option<string>,
 //	}
 type BrokerMessage struct {
+	_       cm.HostLayout
 	Subject string
 	Body    cm.List[uint8]
 	ReplyTo cm.Option[string]
