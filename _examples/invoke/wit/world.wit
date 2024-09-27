@@ -1,0 +1,10 @@
+package example:invoker;
+
+interface invoker {
+  call: func() -> string;
+}
+
+world example {
+  include wasmcloud:component/imports;
+  export invoker;
+}

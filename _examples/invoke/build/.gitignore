@@ -1,0 +1,3 @@
+# Keep the directory but ignore all files. Dir is required to exist by the build process
+*
+!.gitignore
