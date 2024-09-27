@@ -72,7 +72,7 @@ func (self *SecretsError) NotFound() bool {
 // store binary data as a secret.
 //
 //	variant secret-value {
-//		string(string),
+//		%string(string),
 //		bytes(list<u8>),
 //	}
 type SecretValue cm.Variant[uint8, string, cm.List[uint8]]

@@ -3,10 +3,10 @@ module github.com/wasmCloud/component-sdk-go/_examples/http-server
 go 1.23.0
 
 require (
-	github.com/bytecodealliance/wasm-tools-go v0.2.0
+	github.com/bytecodealliance/wasm-tools-go v0.2.1
 	github.com/stretchr/testify v1.9.0
 	go.wasmcloud.dev/component v0.0.0-20240926162413-717d12d37e0f
-	go.wasmcloud.dev/wadge v0.4.1
+	go.wasmcloud.dev/wadge v0.5.0
 )
 
 require (
