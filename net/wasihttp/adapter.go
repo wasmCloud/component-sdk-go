@@ -1,5 +1,7 @@
 package wasihttp
 
+// Refactored from https://github.com/rajatjindal/wasi-go-sdk/tree/d3e8665bef9fbf0794ad14f7114a9882e0d983c3/pkg/wasihttp
+
 import (
 	"fmt"
 	"io"

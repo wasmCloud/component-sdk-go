@@ -51,7 +51,12 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 
 	outRequest.SetAuthority(cm.Some(incomingRequest.Host))
 	outRequest.SetMethod(toWasiMethod(incomingRequest.Method))
-	outRequest.SetPathWithQuery(cm.Some(incomingRequest.URL.Path + "?" + incomingRequest.URL.Query().Encode()))
+
+	pathWithQuery := incomingRequest.URL.Path
+	if incomingRequest.URL.RawQuery != "" {
+		pathWithQuery = pathWithQuery + "?" + incomingRequest.URL.Query().Encode()
+	}
+	outRequest.SetPathWithQuery(cm.Some(pathWithQuery))
 
 	switch incomingRequest.URL.Scheme {
 	case "http":

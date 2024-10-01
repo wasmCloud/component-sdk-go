@@ -17,7 +17,7 @@ Import `go.wasmcloud.dev/component` in your Go module.
 Import the SDK WIT. In `wit/deps.toml`:
 
 ```
-wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/<TBD>.tar.gz"
+wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/main.tar.gz"
 ```
 
 Run `wit-deps` to update your wit dependencies.
@@ -27,6 +27,8 @@ And in your world definition:
 ```
   include wasmcloud:component/imports;
 ```
+
+# Adapters
 
 ## net/wasihttp
 
@@ -48,7 +50,7 @@ func httpServe(w http.ResponseWriter, *r http.Request) {
 
 func init() {
 // request will be fulfilled via wasi:http/incoming-handler
-  wasihttp.Handle("/", httpServe)
+  wasihttp.HandleFunc("/", httpServe)
 }
 ```
 
@@ -87,3 +89,11 @@ logger.Info("Hello", slog.String("planet", "Earth"))
 ```
 
 See `wasilog.Options` for log level & other configuration options.
+
+## Community
+
+Similar projects:
+
+- [rajatjindal/wasi-go-sdk](https://github.com/rajatjindal/wasi-go-sdk)
+- [dev-wasm/dev-wasm-go](https://github.com/dev-wasm/dev-wasm-go)
+- [Mossaka/hello-wasi-http-tinygo](https://github.com/Mossaka/hello-wasi-http-tinygo)
