@@ -31,7 +31,6 @@ func proxyHandler(w http.ResponseWriter, _ *http.Request) {
 		http.Error(w, "failed to make outbound request", http.StatusBadGateway)
 		return
 	}
-	defer resp.Body.Close()
 
 	w.Header().Set("X-Custom-Header", "proxied")
 	w.WriteHeader(resp.StatusCode)

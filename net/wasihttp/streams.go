@@ -59,6 +59,7 @@ func (r *inputStreamReader) parseTrailers() {
 	defer futureTrailers.ResourceDrop()
 
 	trailersResult := futureTrailers.Get()
+	r.body = nil
 
 	// unroll the future
 	if trailersResult.None() {
