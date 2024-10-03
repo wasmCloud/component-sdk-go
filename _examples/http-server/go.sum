@@ -20,6 +20,8 @@ github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGC
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBiLI6FVj/9LpzZWtj1/D6lUovWYBkxHVV3aM=
 go.wasmcloud.dev/wadge v0.5.0 h1:MQQN3fN9K0ntw214KEPryH5/8ZUQx9jOY3rnYuIyZpY=
 go.wasmcloud.dev/wadge v0.5.0/go.mod h1:BkAxt9wF08UWbRYblfxbTtupn0rQLtsgTKeu22SBGRg=
+go.wasmcloud.dev/wadge v0.5.1 h1:APsu3jHuUKrio8CHMbZKQ6T7TIltBNgltCu1YFeYC00=
+go.wasmcloud.dev/wadge v0.5.1/go.mod h1:BkAxt9wF08UWbRYblfxbTtupn0rQLtsgTKeu22SBGRg=
 golang.org/x/mod v0.21.0 h1:vvrHzRwRfVKSiLrG+d4FMl/Qi4ukBCE6kZlTUkDYRT0=
 golang.org/x/mod v0.21.0/go.mod h1:6SkKJ3Xj0I0BrPOZoBy3bdMptDDU9oJrpohJ3eWZ1fY=
 golang.org/x/sync v0.8.0 h1:3NFvSEYkUoMifnESzZl15y791HH1qU2xm6eCJU5ZPXQ=
