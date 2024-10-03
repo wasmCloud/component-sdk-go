@@ -14,10 +14,16 @@ Requires tinygo 0.33 or above.
 
 Import `go.wasmcloud.dev/component` in your Go module.
 
+```bash
+go get go.wasmcloud.dev/component@v0.0.2
+```
+
 Import the SDK WIT. In `wit/deps.toml`:
 
-```
-wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/main.tar.gz"
+```toml
+
+wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/v0.0.2.tar.gz"
+
 ```
 
 Run `wit-deps` to update your wit dependencies.
@@ -25,7 +31,9 @@ Run `wit-deps` to update your wit dependencies.
 And in your world definition:
 
 ```
-  include wasmcloud:component/imports;
+
+include wasmcloud:component/imports;
+
 ```
 
 # Adapters
