@@ -10,7 +10,7 @@ world imports {
   include wasi:cli/imports@0.2.0;
 
   // wasi
-  import wasi:logging/logging;
+  import wasi:logging/logging@0.1.0-draft;
   import wasi:config/runtime@0.2.0-draft;
   import wasi:http/outgoing-handler@0.2.0;
 
