@@ -9,10 +9,6 @@ import (
 
 // Network represents the imported resource "wasi:sockets/network@0.2.0#network".
 //
-// An opaque resource that represents access to (a subset of) the network.
-// This enables context-based security for networking.
-// There is no need for this to map 1:1 to a physical network interface.
-//
 //	resource network
 type Network cm.Resource
 
@@ -32,20 +28,6 @@ func (self Network) ResourceDrop() {
 func wasmimport_NetworkResourceDrop(self0 uint32)
 
 // ErrorCode represents the enum "wasi:sockets/network@0.2.0#error-code".
-//
-// Error codes.
-//
-// In theory, every API can return any error code.
-// In practice, API's typically only return the errors documented per API
-// combined with a couple of errors that are always possible:
-// - `unknown`
-// - `access-denied`
-// - `not-supported`
-// - `out-of-memory`
-// - `concurrency-conflict`
-//
-// See each individual API for what the POSIX equivalents are. They sometimes differ
-// per API.
 //
 //	enum error-code {
 //		unknown,
@@ -73,87 +55,26 @@ func wasmimport_NetworkResourceDrop(self0 uint32)
 type ErrorCode uint8
 
 const (
-	// Unknown error
 	ErrorCodeUnknown ErrorCode = iota
-
-	// Access denied.
-	//
-	// POSIX equivalent: EACCES, EPERM
 	ErrorCodeAccessDenied
-
-	// The operation is not supported.
-	//
-	// POSIX equivalent: EOPNOTSUPP
 	ErrorCodeNotSupported
-
-	// One of the arguments is invalid.
-	//
-	// POSIX equivalent: EINVAL
 	ErrorCodeInvalidArgument
-
-	// Not enough memory to complete the operation.
-	//
-	// POSIX equivalent: ENOMEM, ENOBUFS, EAI_MEMORY
 	ErrorCodeOutOfMemory
-
-	// The operation timed out before it could finish completely.
 	ErrorCodeTimeout
-
-	// This operation is incompatible with another asynchronous operation that is already
-	// in progress.
-	//
-	// POSIX equivalent: EALREADY
 	ErrorCodeConcurrencyConflict
-
-	// Trying to finish an asynchronous operation that:
-	// - has not been started yet, or:
-	// - was already finished by a previous `finish-*` call.
-	//
-	// Note: this is scheduled to be removed when `future`s are natively supported.
 	ErrorCodeNotInProgress
-
-	// The operation has been aborted because it could not be completed immediately.
-	//
-	// Note: this is scheduled to be removed when `future`s are natively supported.
 	ErrorCodeWouldBlock
-
-	// The operation is not valid in the socket's current state.
 	ErrorCodeInvalidState
-
-	// A new socket resource could not be created because of a system limit.
 	ErrorCodeNewSocketLimit
-
-	// A bind operation failed because the provided address is not an address that the
-	// `network` can bind to.
 	ErrorCodeAddressNotBindable
-
-	// A bind operation failed because the provided address is already in use or because
-	// there are no ephemeral ports available.
 	ErrorCodeAddressInUse
-
-	// The remote address is not reachable
 	ErrorCodeRemoteUnreachable
-
-	// The TCP connection was forcefully rejected
 	ErrorCodeConnectionRefused
-
-	// The TCP connection was reset.
 	ErrorCodeConnectionReset
-
-	// A TCP connection was aborted.
 	ErrorCodeConnectionAborted
-
-	// The size of a datagram sent to a UDP socket exceeded the maximum
-	// supported size.
 	ErrorCodeDatagramTooLarge
-
-	// Name does not exist or has no suitable associated IP addresses.
 	ErrorCodeNameUnresolvable
-
-	// A temporary failure in name resolution occurred.
 	ErrorCodeTemporaryResolverFailure
-
-	// A permanent failure in name resolution occurred.
 	ErrorCodePermanentResolverFailure
 )
 
@@ -195,10 +116,7 @@ func (e ErrorCode) String() string {
 type IPAddressFamily uint8
 
 const (
-	// Similar to `AF_INET` in POSIX.
 	IPAddressFamilyIPv4 IPAddressFamily = iota
-
-	// Similar to `AF_INET6` in POSIX.
 	IPAddressFamilyIPv6
 )
 
@@ -257,11 +175,8 @@ func (self *IPAddress) IPv6() *IPv6Address {
 //		address: ipv4-address,
 //	}
 type IPv4SocketAddress struct {
-	_ cm.HostLayout
-	// sin_port
-	Port uint16
-
-	// sin_addr
+	_       cm.HostLayout
+	Port    uint16
 	Address IPv4Address
 }
 
@@ -274,18 +189,11 @@ type IPv4SocketAddress struct {
 //		scope-id: u32,
 //	}
 type IPv6SocketAddress struct {
-	_ cm.HostLayout
-	// sin6_port
-	Port uint16
-
-	// sin6_flowinfo
+	_        cm.HostLayout
+	Port     uint16
 	FlowInfo uint32
-
-	// sin6_addr
-	Address IPv6Address
-
-	// sin6_scope_id
-	ScopeID uint32
+	Address  IPv6Address
+	ScopeID  uint32
 }
 
 // IPSocketAddress represents the variant "wasi:sockets/network@0.2.0#ip-socket-address".
