@@ -32,7 +32,7 @@ And in your world definition:
 
 ```
 
-include wasmcloud:component/imports;
+include wasmcloud:component-go/imports@0.1.0;
 
 ```
 

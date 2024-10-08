@@ -10,8 +10,6 @@ import (
 
 // GetDirectories represents the imported function "get-directories".
 //
-// Return the set of preopened directories, and their path.
-//
 //	get-directories: func() -> list<tuple<descriptor, string>>
 //
 //go:nosplit
