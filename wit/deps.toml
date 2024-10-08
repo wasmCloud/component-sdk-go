@@ -1,5 +1,0 @@
-http = "https://github.com/WebAssembly/wasi-http/archive/v0.2.0.tar.gz"
-config = "https://github.com/WebAssembly/wasi-runtime-config/archive/main.tar.gz"
-logging = "https://github.com/WebAssembly/wasi-logging/archive/main.tar.gz"
-lattice = "https://github.com/wasmCloud/wasmCloud/archive/refs/tags/v1.2.0.tar.gz"
-secrets = "https://github.com/wasmCloud/wasmCloud/releases/download/wit-wasmcloud-secrets-v0.1.0-draft/wit-wasmcloud-secrets-0.1.0-draft.tar.gz"

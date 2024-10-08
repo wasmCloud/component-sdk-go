@@ -1,4 +1,4 @@
-package wasmcloud:component;
+package wasmcloud:component-go@0.1.0;
 
 world exports {
   // wasi
