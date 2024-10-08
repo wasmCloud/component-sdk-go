@@ -5,6 +5,6 @@ interface invoker {
 }
 
 world example {
-  include wasmcloud:component/imports;
+  include wasmcloud:component-go/imports@0.1.0;
   export invoker;
 }
