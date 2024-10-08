@@ -9,8 +9,6 @@ import (
 
 // ConfigError represents the variant "wasi:config/runtime@0.2.0-draft#config-error".
 //
-// An error type that encapsulates the different errors that can occur fetching config
-//
 //	variant config-error {
 //		upstream(string),
 //		io(string),
@@ -18,11 +16,6 @@ import (
 type ConfigError cm.Variant[uint8, string, string]
 
 // ConfigErrorUpstream returns a [ConfigError] of case "upstream".
-//
-// This indicates an error from an "upstream" config source.
-// As this could be almost _anything_ (such as Vault, Kubernetes ConfigMaps, KeyValue
-// buckets, etc),
-// the error message is a string.
 func ConfigErrorUpstream(data string) ConfigError {
 	return cm.New[ConfigError](0, data)
 }
@@ -33,14 +26,6 @@ func (self *ConfigError) Upstream() *string {
 }
 
 // ConfigErrorIO returns a [ConfigError] of case "io".
-//
-// This indicates an error from an I/O operation.
-// As this could be almost _anything_ (such as a file read, network connection, etc),
-// the error message is a string.
-// Depending on how this ends up being consumed,
-// we may consider moving this to use the `wasi:io/error` type instead.
-// For simplicity right now in supporting multiple implementations, it is being left
-// as a string.
 func ConfigErrorIO(data string) ConfigError {
 	return cm.New[ConfigError](1, data)
 }
@@ -51,8 +36,6 @@ func (self *ConfigError) IO() *string {
 }
 
 // Get represents the imported function "get".
-//
-// Gets a single opaque config value set at the given key if it exists
 //
 //	get: func(key: string) -> result<option<string>, config-error>
 //
@@ -68,8 +51,6 @@ func Get(key string) (result cm.Result[OptionStringShape, cm.Option[string], Con
 func wasmimport_Get(key0 *uint8, key1 uint32, result *cm.Result[OptionStringShape, cm.Option[string], ConfigError])
 
 // GetAll represents the imported function "get-all".
-//
-// Gets a list of all set config data
 //
 //	get-all: func() -> result<list<tuple<string, string>>, config-error>
 //
