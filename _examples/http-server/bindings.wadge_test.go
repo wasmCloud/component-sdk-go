@@ -1989,7 +1989,7 @@ func wasmimport_Log(level0 uint32, context0 *uint8, context1 uint32, message0 *u
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
-		return __instance.Call("wasi:logging/logging", "log", func() unsafe.Pointer {
+		return __instance.Call("wasi:logging/logging@0.1.0-draft", "log", func() unsafe.Pointer {
 			ptr := unsafe.Pointer(&level0)
 			__p.Pin(ptr)
 			return ptr
