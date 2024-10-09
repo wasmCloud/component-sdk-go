@@ -9,8 +9,6 @@ import (
 
 // SecretsError represents the variant "wasmcloud:secrets/store@0.1.0-draft#secrets-error".
 //
-// An error type that encapsulates the different errors that can occur fetching secrets
-//
 //	variant secrets-error {
 //		upstream(string),
 //		io(string),
@@ -19,11 +17,6 @@ import (
 type SecretsError cm.Variant[uint8, string, string]
 
 // SecretsErrorUpstream returns a [SecretsError] of case "upstream".
-//
-// This indicates an error from an "upstream" secrets source.
-// As this could be almost _anything_ (such as Vault, Kubernetes Secrets, KeyValue
-// buckets, etc),
-// the error message is a string.
 func SecretsErrorUpstream(data string) SecretsError {
 	return cm.New[SecretsError](0, data)
 }
@@ -34,14 +27,6 @@ func (self *SecretsError) Upstream() *string {
 }
 
 // SecretsErrorIO returns a [SecretsError] of case "io".
-//
-// This indicates an error from an I/O operation.
-// As this could be almost _anything_ (such as a file read, network connection, etc),
-// the error message is a string.
-// Depending on how this ends up being consumed,
-// we may consider moving this to use the `wasi:io/error` type instead.
-// For simplicity right now in supporting multiple implementations, it is being left
-// as a string.
 func SecretsErrorIO(data string) SecretsError {
 	return cm.New[SecretsError](1, data)
 }
@@ -52,10 +37,6 @@ func (self *SecretsError) IO() *string {
 }
 
 // SecretsErrorNotFound returns a [SecretsError] of case "not-found".
-//
-// This indicates that the secret was not found. Generally "not found" errors will
-// be handled by the upstream secrets backend, but there are cases where the host
-// may need to return this error.
 func SecretsErrorNotFound() SecretsError {
 	var data struct{}
 	return cm.New[SecretsError](2, data)
@@ -68,18 +49,13 @@ func (self *SecretsError) NotFound() bool {
 
 // SecretValue represents the variant "wasmcloud:secrets/store@0.1.0-draft#secret-value".
 //
-// A secret value can be either a string or a byte array, which lets you
-// store binary data as a secret.
-//
 //	variant secret-value {
-//		string(string),
+//		%string(string),
 //		bytes(list<u8>),
 //	}
 type SecretValue cm.Variant[uint8, string, cm.List[uint8]]
 
 // SecretValueString returns a [SecretValue] of case "string".
-//
-// A string value
 func SecretValueString(data string) SecretValue {
 	return cm.New[SecretValue](0, data)
 }
@@ -90,8 +66,6 @@ func (self *SecretValue) String() *string {
 }
 
 // SecretValueBytes returns a [SecretValue] of case "bytes".
-//
-// A byte array value
 func SecretValueBytes(data cm.List[uint8]) SecretValue {
 	return cm.New[SecretValue](1, data)
 }
@@ -102,11 +76,6 @@ func (self *SecretValue) Bytes() *cm.List[uint8] {
 }
 
 // Secret represents the imported resource "wasmcloud:secrets/store@0.1.0-draft#secret".
-//
-// A secret is a resource that can only be borrowed. This allows you to
-// pass around handles to secrets and not reveal the values until a
-// component needs them.
-// You need to use the reveal interface to get the value.
 //
 //	resource secret
 type Secret cm.Resource
@@ -127,8 +96,6 @@ func (self Secret) ResourceDrop() {
 func wasmimport_SecretResourceDrop(self0 uint32)
 
 // Get represents the imported function "get".
-//
-// Gets a single opaque secrets value set at the given key if it exists
 //
 //	get: func(key: string) -> result<secret, secrets-error>
 //

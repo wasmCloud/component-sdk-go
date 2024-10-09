@@ -1,0 +1,56 @@
+name: Publish WIT package
+
+on:
+  push:
+    tags:
+    - 'wit-v*'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+    - name: Extract tag context
+      id: ctx
+      run: |
+          version=${GITHUB_REF_NAME#wit-v}
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tarball=wit-${version}.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "version is ${version}"
+    - uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c
+      with:
+        tool: wkg@0.7.4
+    - name: Generate and set wkg config
+      shell: bash
+      env:
+        WKG_OCI_USERNAME: ${{ github.repository_owner }}
+        WKG_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cat << EOF > wkg-config.toml
+        [namespace_registries]
+        wasmcloud = "wasmcloud.com"
+        wrpc = "bytecodealliance.org"
+        wasi = "wasi.dev"
+
+        [registry."wasmcloud.com".oci]
+        auth = { username = "${WKG_OCI_USERNAME}", password = "${WKG_OCI_PASSWORD}" }
+        EOF
+        echo "WKG_CONFIG_FILE=$(realpath wkg-config.toml)" >> $GITHUB_ENV
+    - name: Build
+      run: wkg wit build -o package.wasm
+    - name: Push version-tagged WebAssembly binary to GHCR
+      run: wkg publish package.wasm
+    - name: Package tarball for release
+      run: |
+          tar -cvzf ${{ steps.ctx.outputs.tarball }} wit
+    - name: Release
+      uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191
+      with:
+          files: ${{ steps.ctx.outputs.tarball }}
+          make_latest: "false"
