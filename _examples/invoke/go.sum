@@ -16,10 +16,10 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/urfave/cli/v3 v3.0.0-alpha9 h1:P0RMy5fQm1AslQS+XCmy9UknDXctOmG/q/FZkUFnJSo=
 github.com/urfave/cli/v3 v3.0.0-alpha9/go.mod h1:0kK/RUFHyh+yIKSfWxwheGndfnrvYSmYFVeKCh03ZUc=
-github.com/wasmCloud/wadge v0.3.0 h1:uDmsxgeACARbW9idI9HBf9CQj+nQHskRN7lch6WzJN0=
-github.com/wasmCloud/wadge v0.3.0/go.mod h1:d1D1q/mtLr6v6hg/UCIq4G8Ygf6ku7M8VS6/4MhL5Xk=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGCjxCBTO/36wtF6j2nSip77qHd4x4=
 github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBiLI6FVj/9LpzZWtj1/D6lUovWYBkxHVV3aM=
+go.wasmcloud.dev/wadge v0.6.0 h1:wHcnXZhxJ9eVzp/38eyo2oc6bkS2qNS5a4FrBUCFIPE=
+go.wasmcloud.dev/wadge v0.6.0/go.mod h1:BkAxt9wF08UWbRYblfxbTtupn0rQLtsgTKeu22SBGRg=
 golang.org/x/mod v0.21.0 h1:vvrHzRwRfVKSiLrG+d4FMl/Qi4ukBCE6kZlTUkDYRT0=
 golang.org/x/mod v0.21.0/go.mod h1:6SkKJ3Xj0I0BrPOZoBy3bdMptDDU9oJrpohJ3eWZ1fY=
 golang.org/x/sync v0.8.0 h1:3NFvSEYkUoMifnESzZl15y791HH1qU2xm6eCJU5ZPXQ=
