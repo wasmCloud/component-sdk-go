@@ -55,6 +55,7 @@ jobs:
         example:
           - http-server
           - http-client
+          - invoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
