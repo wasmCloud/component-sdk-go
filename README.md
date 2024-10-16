@@ -2,8 +2,6 @@
 
 [![Go Reference](https://pkg.go.dev/badge/go.wasmcloud.dev/component.svg)](https://pkg.go.dev/go.wasmcloud.dev/component)
 
-Warning: API stabilization in progress. Once ready it will be published as `v0.0.1`.
-
 The Go Component SDK provides a set of packages to simplify the development of WebAssembly components targeting the [wasmCloud](https://wasmcloud.com) host runtime.
 
 Writing a wasmCloud Capability Provider? Check out the [Go Provider SDK](https://github.com/wasmCloud/provider-sdk-go).
@@ -15,14 +13,14 @@ Requires tinygo 0.33 or above.
 Import `go.wasmcloud.dev/component` in your Go module.
 
 ```bash
-go get go.wasmcloud.dev/component@v0.0.2
+go get go.wasmcloud.dev/component@v0.0.3
 ```
 
 Import the SDK WIT. In `wit/deps.toml`:
 
 ```toml
 
-wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/v0.0.2.tar.gz"
+wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/v0.0.3.tar.gz"
 
 ```
 
