@@ -1,4 +1,4 @@
-//go:generate go run github.com/wasmCloud/wadge/cmd/wadge-bindgen-go
+//go:generate go run go.wasmcloud.dev/wadge/cmd/wadge-bindgen-go -test
 
 package main
 
@@ -9,8 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/wasmCloud/wadge"
-	_ "github.com/wasmCloud/wadge/bindings"
+	"go.wasmcloud.dev/wadge"
 )
 
 func init() {
