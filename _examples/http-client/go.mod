@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	github.com/bytecodealliance/wasm-tools-go v0.2.1
-	go.wasmcloud.dev/component v0.0.0-20240926175945-14adda9179b6
+	go.wasmcloud.dev/component v0.0.3
 )
 
 require (
@@ -13,6 +13,3 @@ require (
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/mod v0.21.0 // indirect
 )
-
-// TODO(lxf): remove this line once the module is published
-replace go.wasmcloud.dev/component => ../..
