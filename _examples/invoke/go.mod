@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/bytecodealliance/wasm-tools-go v0.2.1
 	github.com/stretchr/testify v1.9.0
-	go.wasmcloud.dev/component v0.0.0-20240910182305-2785f866ff0f
+	go.wasmcloud.dev/component v0.0.3
 	go.wasmcloud.dev/wadge v0.6.0
 )
 
@@ -23,6 +23,3 @@ require (
 	golang.org/x/tools v0.25.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// TODO(lxf): remove this line once the module is published
-replace go.wasmcloud.dev/component => ../..
