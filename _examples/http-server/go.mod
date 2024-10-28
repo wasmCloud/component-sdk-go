@@ -6,7 +6,7 @@ require (
 	github.com/bytecodealliance/wasm-tools-go v0.3.0
 	github.com/stretchr/testify v1.9.0
 	go.wasmcloud.dev/component v0.0.3
-	go.wasmcloud.dev/wadge v0.6.0
+	go.wasmcloud.dev/wadge v0.7.0
 )
 
 require (
