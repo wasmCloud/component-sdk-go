@@ -50,6 +50,16 @@ func (self *ConfigError) IO() *string {
 	return cm.Case[string](self, 1)
 }
 
+var stringsConfigError = [2]string{
+	"upstream",
+	"io",
+}
+
+// String implements [fmt.Stringer], returning the variant case name of v.
+func (v ConfigError) String() string {
+	return stringsConfigError[v.Tag()]
+}
+
 // Get represents the imported function "get".
 //
 // Gets a single opaque config value set at the given key if it exists
@@ -63,10 +73,6 @@ func Get(key string) (result cm.Result[OptionStringShape, cm.Option[string], Con
 	return
 }
 
-//go:wasmimport wasi:config/runtime@0.2.0-draft get
-//go:noescape
-func wasmimport_Get(key0 *uint8, key1 uint32, result *cm.Result[OptionStringShape, cm.Option[string], ConfigError])
-
 // GetAll represents the imported function "get-all".
 //
 // Gets a list of all set config data
@@ -78,7 +84,3 @@ func GetAll() (result cm.Result[ConfigErrorShape, cm.List[[2]string], ConfigErro
 	wasmimport_GetAll(&result)
 	return
 }
-
-//go:wasmimport wasi:config/runtime@0.2.0-draft get-all
-//go:noescape
-func wasmimport_GetAll(result *cm.Result[ConfigErrorShape, cm.List[[2]string], ConfigError])

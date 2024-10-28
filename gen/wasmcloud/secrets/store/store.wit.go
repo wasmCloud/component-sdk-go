@@ -66,6 +66,17 @@ func (self *SecretsError) NotFound() bool {
 	return self.Tag() == 2
 }
 
+var stringsSecretsError = [3]string{
+	"upstream",
+	"io",
+	"not-found",
+}
+
+// String implements [fmt.Stringer], returning the variant case name of v.
+func (v SecretsError) String() string {
+	return stringsSecretsError[v.Tag()]
+}
+
 // SecretValue represents the variant "wasmcloud:secrets/store@0.1.0-draft#secret-value".
 //
 // A secret value can be either a string or a byte array, which lets you
@@ -77,15 +88,15 @@ func (self *SecretsError) NotFound() bool {
 //	}
 type SecretValue cm.Variant[uint8, string, cm.List[uint8]]
 
-// SecretValueString returns a [SecretValue] of case "string".
+// SecretValueString_ returns a [SecretValue] of case "string".
 //
 // A string value
-func SecretValueString(data string) SecretValue {
+func SecretValueString_(data string) SecretValue {
 	return cm.New[SecretValue](0, data)
 }
 
-// String returns a non-nil *[string] if [SecretValue] represents the variant case "string".
-func (self *SecretValue) String() *string {
+// String_ returns a non-nil *[string] if [SecretValue] represents the variant case "string".
+func (self *SecretValue) String_() *string {
 	return cm.Case[string](self, 0)
 }
 
@@ -99,6 +110,16 @@ func SecretValueBytes(data cm.List[uint8]) SecretValue {
 // Bytes returns a non-nil *[cm.List[uint8]] if [SecretValue] represents the variant case "bytes".
 func (self *SecretValue) Bytes() *cm.List[uint8] {
 	return cm.Case[cm.List[uint8]](self, 1)
+}
+
+var stringsSecretValue = [2]string{
+	"string",
+	"bytes",
+}
+
+// String implements [fmt.Stringer], returning the variant case name of v.
+func (v SecretValue) String() string {
+	return stringsSecretValue[v.Tag()]
 }
 
 // Secret represents the imported resource "wasmcloud:secrets/store@0.1.0-draft#secret".
@@ -122,10 +143,6 @@ func (self Secret) ResourceDrop() {
 	return
 }
 
-//go:wasmimport wasmcloud:secrets/store@0.1.0-draft [resource-drop]secret
-//go:noescape
-func wasmimport_SecretResourceDrop(self0 uint32)
-
 // Get represents the imported function "get".
 //
 // Gets a single opaque secrets value set at the given key if it exists
@@ -138,7 +155,3 @@ func Get(key string) (result cm.Result[SecretsErrorShape, Secret, SecretsError])
 	wasmimport_Get((*uint8)(key0), (uint32)(key1), &result)
 	return
 }
-
-//go:wasmimport wasmcloud:secrets/store@0.1.0-draft get
-//go:noescape
-func wasmimport_Get(key0 *uint8, key1 uint32, result *cm.Result[SecretsErrorShape, Secret, SecretsError])

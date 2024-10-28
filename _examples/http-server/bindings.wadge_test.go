@@ -6,7 +6,6 @@ package main_test
 
 import (
 	github_com__bytecodealliance__wasm___tools___go__cm "github.com/bytecodealliance/wasm-tools-go/cm"
-	go_wasmcloud_dev__component__gen__wasi__clocks__monotonic___clock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	go_wasmcloud_dev__component__gen__wasi__http__outgoing___handler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
 	go_wasmcloud_dev__component__gen__wasi__http__types "go.wasmcloud.dev/component/gen/wasi/http/types"
 	go_wasmcloud_dev__component__gen__wasi__io__poll "go.wasmcloud.dev/component/gen/wasi/io/poll"
@@ -93,7 +92,7 @@ func wasmimport_SubscribeInstant(when0 uint64) (result0 uint32) {
 }
 
 //go:linkname wasmimport_Handle go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler.wasmimport_Handle
-func wasmimport_Handle(request0 uint32, options0 uint32, options1 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__outgoing___handler.ErrorCodeShape, go_wasmcloud_dev__component__gen__wasi__http__types.FutureIncomingResponse, go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCode]) {
+func wasmimport_Handle(request0 uint32, options0 uint32, options1 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__outgoing___handler.ErrorCodeShape, FutureIncomingResponse, ErrorCode]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -429,7 +428,7 @@ func wasmimport_FutureIncomingResponseSubscribe(self0 uint32) (result0 uint32) {
 }
 
 //go:linkname wasmimport_FutureTrailersGet go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_FutureTrailersGet
-func wasmimport_FutureTrailersGet(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[github_com__bytecodealliance__wasm___tools___go__cm.Result[github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCodeShape, github_com__bytecodealliance__wasm___tools___go__cm.Option[go_wasmcloud_dev__component__gen__wasi__http__types.Fields], go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCode], github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCodeShape, github_com__bytecodealliance__wasm___tools___go__cm.Option[go_wasmcloud_dev__component__gen__wasi__http__types.Fields], go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCode], struct{}]]) {
+func wasmimport_FutureTrailersGet(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[github_com__bytecodealliance__wasm___tools___go__cm.Result[github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCodeShape, github_com__bytecodealliance__wasm___tools___go__cm.Option[Trailers], go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCode], github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCodeShape, github_com__bytecodealliance__wasm___tools___go__cm.Option[Trailers], go_wasmcloud_dev__component__gen__wasi__http__types.ErrorCode], struct{}]]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -469,7 +468,7 @@ func wasmimport_FutureTrailersSubscribe(self0 uint32) (result0 uint32) {
 }
 
 //go:linkname wasmimport_IncomingBodyStream go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_IncomingBodyStream
-func wasmimport_IncomingBodyStream(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__io__streams.InputStream, go_wasmcloud_dev__component__gen__wasi__io__streams.InputStream, struct{}]) {
+func wasmimport_IncomingBodyStream(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[InputStream, InputStream, struct{}]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -669,7 +668,7 @@ func wasmimport_IncomingResponseStatus(self0 uint32) (result0 uint32) {
 }
 
 //go:linkname wasmimport_OutgoingBodyWrite go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_OutgoingBodyWrite
-func wasmimport_OutgoingBodyWrite(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[go_wasmcloud_dev__component__gen__wasi__io__streams.OutputStream, go_wasmcloud_dev__component__gen__wasi__io__streams.OutputStream, struct{}]) {
+func wasmimport_OutgoingBodyWrite(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Result[OutputStream, OutputStream, struct{}]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -1025,7 +1024,7 @@ func wasmimport_OutgoingResponseStatusCode(self0 uint32) (result0 uint32) {
 }
 
 //go:linkname wasmimport_RequestOptionsBetweenBytesTimeout go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_RequestOptionsBetweenBytesTimeout
-func wasmimport_RequestOptionsBetweenBytesTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[go_wasmcloud_dev__component__gen__wasi__clocks__monotonic___clock.Duration]) {
+func wasmimport_RequestOptionsBetweenBytesTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[Duration]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -1045,7 +1044,7 @@ func wasmimport_RequestOptionsBetweenBytesTimeout(self0 uint32, result *github_c
 }
 
 //go:linkname wasmimport_RequestOptionsConnectTimeout go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_RequestOptionsConnectTimeout
-func wasmimport_RequestOptionsConnectTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[go_wasmcloud_dev__component__gen__wasi__clocks__monotonic___clock.Duration]) {
+func wasmimport_RequestOptionsConnectTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[Duration]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {
@@ -1065,7 +1064,7 @@ func wasmimport_RequestOptionsConnectTimeout(self0 uint32, result *github_com__b
 }
 
 //go:linkname wasmimport_RequestOptionsFirstByteTimeout go.wasmcloud.dev/component/gen/wasi/http/types.wasmimport_RequestOptionsFirstByteTimeout
-func wasmimport_RequestOptionsFirstByteTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[go_wasmcloud_dev__component__gen__wasi__clocks__monotonic___clock.Duration]) {
+func wasmimport_RequestOptionsFirstByteTimeout(self0 uint32, result *github_com__bytecodealliance__wasm___tools___go__cm.Option[Duration]) {
 	var __p runtime.Pinner
 	defer __p.Unpin()
 	if __err := wadge.WithCurrentInstance(func(__instance *wadge.Instance) error {

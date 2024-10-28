@@ -19,7 +19,7 @@ func SecretGetAndReveal(key string) ([]byte, error) {
 	defer opaqueSecret.ResourceDrop()
 
 	revealed := reveal.Reveal(opaqueSecret)
-	if s := revealed.String(); s != nil {
+	if s := revealed.String_(); s != nil {
 		return []byte(*s), nil
 	}
 
