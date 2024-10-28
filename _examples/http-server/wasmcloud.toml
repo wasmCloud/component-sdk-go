@@ -1,10 +1,8 @@
 name = "http_server"
-language = "other"
+language = "tinygo"
 type = "component"
 version = "0.1.0"
 
 [component]
-build_command = "tinygo build -target=wasip2 --wit-package ./wit --wit-world example -o build/http_server.wasm main.go"
 wit_world = "example"
 wasm_target = "wasm32-wasi-preview2"
-destination = "build/http_server_s.wasm"

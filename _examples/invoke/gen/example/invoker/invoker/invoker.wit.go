@@ -2,11 +2,3 @@
 
 // Package invoker represents the exported interface "example:invoker/invoker".
 package invoker
-
-//go:wasmexport example:invoker/invoker#call
-//export example:invoker/invoker#call
-func wasmexport_Call() (result *string) {
-	result_ := Exports.Call()
-	result = &result_
-	return
-}

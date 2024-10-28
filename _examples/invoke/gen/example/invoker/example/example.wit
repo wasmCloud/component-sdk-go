@@ -1,0 +1,704 @@
+package example:invoker;
+
+interface invoker {
+	call: func() -> string;
+}
+
+world example {
+	import wasi:logging/logging@0.1.0-draft;
+	import wasi:config/runtime@0.2.0-draft;
+	import wasi:io/poll@0.2.0;
+	import wasi:clocks/monotonic-clock@0.2.0;
+	import wasi:io/error@0.2.0;
+	import wasi:io/streams@0.2.0;
+	import wasi:http/types@0.2.0;
+	import wasi:http/outgoing-handler@0.2.0;
+	import wasmcloud:bus/lattice@1.0.0;
+	import wasmcloud:secrets/store@0.1.0-draft;
+	import wasmcloud:secrets/reveal@0.1.0-draft;
+	import wasi:cli/environment@0.2.0;
+	import wasi:cli/exit@0.2.0;
+	import wasi:cli/stdin@0.2.0;
+	import wasi:cli/stdout@0.2.0;
+	import wasi:cli/stderr@0.2.0;
+	import wasi:cli/terminal-input@0.2.0;
+	import wasi:cli/terminal-output@0.2.0;
+	import wasi:cli/terminal-stdin@0.2.0;
+	import wasi:cli/terminal-stdout@0.2.0;
+	import wasi:cli/terminal-stderr@0.2.0;
+	import wasi:clocks/wall-clock@0.2.0;
+	import wasi:filesystem/types@0.2.0;
+	import wasi:filesystem/preopens@0.2.0;
+	import wasi:sockets/network@0.2.0;
+	import wasi:sockets/instance-network@0.2.0;
+	import wasi:sockets/udp@0.2.0;
+	import wasi:sockets/udp-create-socket@0.2.0;
+	import wasi:sockets/tcp@0.2.0;
+	import wasi:sockets/tcp-create-socket@0.2.0;
+	import wasi:sockets/ip-name-lookup@0.2.0;
+	import wasi:random/random@0.2.0;
+	import wasi:random/insecure@0.2.0;
+	import wasi:random/insecure-seed@0.2.0;
+	export invoker;
+}
+
+package wasi:cli@0.2.0 {
+	interface environment {
+		get-environment: func() -> list<tuple<string, string>>;
+		get-arguments: func() -> list<string>;
+		initial-cwd: func() -> option<string>;
+	}
+
+	interface exit {
+		exit: func(status: result);
+	}
+
+	interface stdin {
+		use wasi:io/streams@0.2.0.{input-stream};
+		get-stdin: func() -> input-stream;
+	}
+
+	interface stdout {
+		use wasi:io/streams@0.2.0.{output-stream};
+		get-stdout: func() -> output-stream;
+	}
+
+	interface stderr {
+		use wasi:io/streams@0.2.0.{output-stream};
+		get-stderr: func() -> output-stream;
+	}
+
+	interface terminal-input {
+		resource terminal-input;
+	}
+
+	interface terminal-output {
+		resource terminal-output;
+	}
+
+	interface terminal-stdin {
+		use terminal-input.{terminal-input};
+		get-terminal-stdin: func() -> option<terminal-input>;
+	}
+
+	interface terminal-stdout {
+		use terminal-output.{terminal-output};
+		get-terminal-stdout: func() -> option<terminal-output>;
+	}
+
+	interface terminal-stderr {
+		use terminal-output.{terminal-output};
+		get-terminal-stderr: func() -> option<terminal-output>;
+	}
+}
+
+package wasi:config@0.2.0-draft {
+	interface runtime {
+		variant config-error {
+			upstream(string),
+			io(string),
+		}
+		get: func(key: string) -> result<option<string>, config-error>;
+		get-all: func() -> result<list<tuple<string, string>>, config-error>;
+	}
+}
+
+package wasi:filesystem@0.2.0 {
+	interface types {
+		use wasi:io/streams@0.2.0.{input-stream};
+		use wasi:io/streams@0.2.0.{output-stream};
+		use wasi:io/streams@0.2.0.{error};
+		use wasi:clocks/wall-clock@0.2.0.{datetime};
+		type filesize = u64;
+		enum descriptor-type {
+			unknown,
+			block-device,
+			character-device,
+			directory,
+			fifo,
+			symbolic-link,
+			regular-file,
+			socket
+		}
+		flags descriptor-flags {
+			read,
+			write,
+			file-integrity-sync,
+			data-integrity-sync,
+			requested-write-sync,
+			mutate-directory,
+		}
+		flags path-flags { symlink-follow }
+		flags open-flags {
+			create,
+			directory,
+			exclusive,
+			truncate,
+		}
+		type link-count = u64;
+		record descriptor-stat {
+			%type: descriptor-type,
+			link-count: link-count,
+			size: filesize,
+			data-access-timestamp: option<datetime>,
+			data-modification-timestamp: option<datetime>,
+			status-change-timestamp: option<datetime>,
+		}
+		variant new-timestamp {
+			no-change,
+			now,
+			timestamp(datetime),
+		}
+		record directory-entry {
+			%type: descriptor-type,
+			name: string,
+		}
+		enum error-code {
+			access,
+			would-block,
+			already,
+			bad-descriptor,
+			busy,
+			deadlock,
+			quota,
+			exist,
+			file-too-large,
+			illegal-byte-sequence,
+			in-progress,
+			interrupted,
+			invalid,
+			io,
+			is-directory,
+			loop,
+			too-many-links,
+			message-size,
+			name-too-long,
+			no-device,
+			no-entry,
+			no-lock,
+			insufficient-memory,
+			insufficient-space,
+			not-directory,
+			not-empty,
+			not-recoverable,
+			unsupported,
+			no-tty,
+			no-such-device,
+			overflow,
+			not-permitted,
+			pipe,
+			read-only,
+			invalid-seek,
+			text-file-busy,
+			cross-device
+		}
+		enum advice {
+			normal,
+			sequential,
+			random,
+			will-need,
+			dont-need,
+			no-reuse
+		}
+		record metadata-hash-value {
+			lower: u64,
+			upper: u64,
+		}
+		resource descriptor {
+			advise: func(offset: filesize, length: filesize, advice: advice) -> result<_, error-code>;
+			append-via-stream: func() -> result<output-stream, error-code>;
+			create-directory-at: func(path: string) -> result<_, error-code>;
+			get-flags: func() -> result<descriptor-flags, error-code>;
+			get-type: func() -> result<descriptor-type, error-code>;
+			is-same-object: func(other: borrow<descriptor>) -> bool;
+			link-at: func(old-path-flags: path-flags, old-path: string, new-descriptor: borrow<descriptor>, new-path: string) -> result<_, error-code>;
+			metadata-hash: func() -> result<metadata-hash-value, error-code>;
+			metadata-hash-at: func(path-flags: path-flags, path: string) -> result<metadata-hash-value, error-code>;
+			open-at: func(path-flags: path-flags, path: string, open-flags: open-flags, %flags: descriptor-flags) -> result<descriptor, error-code>;
+			read: func(length: filesize, offset: filesize) -> result<tuple<list<u8>, bool>, error-code>;
+			read-directory: func() -> result<directory-entry-stream, error-code>;
+			read-via-stream: func(offset: filesize) -> result<input-stream, error-code>;
+			readlink-at: func(path: string) -> result<string, error-code>;
+			remove-directory-at: func(path: string) -> result<_, error-code>;
+			rename-at: func(old-path: string, new-descriptor: borrow<descriptor>, new-path: string) -> result<_, error-code>;
+			set-size: func(size: filesize) -> result<_, error-code>;
+			set-times: func(data-access-timestamp: new-timestamp, data-modification-timestamp: new-timestamp) -> result<_, error-code>;
+			set-times-at: func(path-flags: path-flags, path: string, data-access-timestamp: new-timestamp, data-modification-timestamp: new-timestamp) -> result<_, error-code>;
+			stat: func() -> result<descriptor-stat, error-code>;
+			stat-at: func(path-flags: path-flags, path: string) -> result<descriptor-stat, error-code>;
+			symlink-at: func(old-path: string, new-path: string) -> result<_, error-code>;
+			sync: func() -> result<_, error-code>;
+			sync-data: func() -> result<_, error-code>;
+			unlink-file-at: func(path: string) -> result<_, error-code>;
+			write: func(buffer: list<u8>, offset: filesize) -> result<filesize, error-code>;
+			write-via-stream: func(offset: filesize) -> result<output-stream, error-code>;
+		}
+		resource directory-entry-stream {
+			read-directory-entry: func() -> result<option<directory-entry>, error-code>;
+		}
+		filesystem-error-code: func(err: borrow<error>) -> option<error-code>;
+	}
+
+	interface preopens {
+		use types.{descriptor};
+		get-directories: func() -> list<tuple<descriptor, string>>;
+	}
+}
+
+package wasi:http@0.2.0 {
+	interface types {
+		use wasi:clocks/monotonic-clock@0.2.0.{duration};
+		use wasi:io/streams@0.2.0.{input-stream};
+		use wasi:io/streams@0.2.0.{output-stream};
+		use wasi:io/error@0.2.0.{error as io-error};
+		use wasi:io/poll@0.2.0.{pollable};
+		variant method {
+			get,
+			head,
+			post,
+			put,
+			delete,
+			connect,
+			options,
+			trace,
+			patch,
+			other(string),
+		}
+		variant scheme { HTTP, HTTPS, other(string) }
+		record DNS-error-payload {
+			rcode: option<string>,
+			info-code: option<u16>,
+		}
+		record TLS-alert-received-payload {
+			alert-id: option<u8>,
+			alert-message: option<string>,
+		}
+		record field-size-payload {
+			field-name: option<string>,
+			field-size: option<u32>,
+		}
+		variant error-code {
+			DNS-timeout,
+			DNS-error(DNS-error-payload),
+			destination-not-found,
+			destination-unavailable,
+			destination-IP-prohibited,
+			destination-IP-unroutable,
+			connection-refused,
+			connection-terminated,
+			connection-timeout,
+			connection-read-timeout,
+			connection-write-timeout,
+			connection-limit-reached,
+			TLS-protocol-error,
+			TLS-certificate-error,
+			TLS-alert-received(TLS-alert-received-payload),
+			HTTP-request-denied,
+			HTTP-request-length-required,
+			HTTP-request-body-size(option<u64>),
+			HTTP-request-method-invalid,
+			HTTP-request-URI-invalid,
+			HTTP-request-URI-too-long,
+			HTTP-request-header-section-size(option<u32>),
+			HTTP-request-header-size(option<field-size-payload>),
+			HTTP-request-trailer-section-size(option<u32>),
+			HTTP-request-trailer-size(field-size-payload),
+			HTTP-response-incomplete,
+			HTTP-response-header-section-size(option<u32>),
+			HTTP-response-header-size(field-size-payload),
+			HTTP-response-body-size(option<u64>),
+			HTTP-response-trailer-section-size(option<u32>),
+			HTTP-response-trailer-size(field-size-payload),
+			HTTP-response-transfer-coding(option<string>),
+			HTTP-response-content-coding(option<string>),
+			HTTP-response-timeout,
+			HTTP-upgrade-failed,
+			HTTP-protocol-error,
+			loop-detected,
+			configuration-error,
+			internal-error(option<string>),
+		}
+		variant header-error {
+			invalid-syntax,
+			forbidden,
+			immutable,
+		}
+		type field-key = string;
+		type field-value = list<u8>;
+		resource fields {
+			constructor();
+			append: func(name: field-key, value: field-value) -> result<_, header-error>;
+			clone: func() -> fields;
+			delete: func(name: field-key) -> result<_, header-error>;
+			entries: func() -> list<tuple<field-key, field-value>>;
+			get: func(name: field-key) -> list<field-value>;
+			has: func(name: field-key) -> bool;
+			set: func(name: field-key, value: list<field-value>) -> result<_, header-error>;
+			from-list: static func(entries: list<tuple<field-key, field-value>>) -> result<fields, header-error>;
+		}
+		type headers = fields;
+		type trailers = fields;
+		resource incoming-request {
+			authority: func() -> option<string>;
+			consume: func() -> result<incoming-body>;
+			headers: func() -> headers;
+			method: func() -> method;
+			path-with-query: func() -> option<string>;
+			scheme: func() -> option<scheme>;
+		}
+		resource outgoing-request {
+			constructor(headers: headers);
+			authority: func() -> option<string>;
+			body: func() -> result<outgoing-body>;
+			headers: func() -> headers;
+			method: func() -> method;
+			path-with-query: func() -> option<string>;
+			scheme: func() -> option<scheme>;
+			set-authority: func(authority: option<string>) -> result;
+			set-method: func(method: method) -> result;
+			set-path-with-query: func(path-with-query: option<string>) -> result;
+			set-scheme: func(scheme: option<scheme>) -> result;
+		}
+		resource request-options {
+			constructor();
+			between-bytes-timeout: func() -> option<duration>;
+			connect-timeout: func() -> option<duration>;
+			first-byte-timeout: func() -> option<duration>;
+			set-between-bytes-timeout: func(duration: option<duration>) -> result;
+			set-connect-timeout: func(duration: option<duration>) -> result;
+			set-first-byte-timeout: func(duration: option<duration>) -> result;
+		}
+		resource response-outparam {
+			set: static func(param: response-outparam, response: result<outgoing-response, error-code>);
+		}
+		type status-code = u16;
+		resource incoming-response {
+			consume: func() -> result<incoming-body>;
+			headers: func() -> headers;
+			status: func() -> status-code;
+		}
+		resource incoming-body {
+			%stream: func() -> result<input-stream>;
+			finish: static func(this: incoming-body) -> future-trailers;
+		}
+		resource future-trailers {
+			get: func() -> option<result<result<option<trailers>, error-code>>>;
+			subscribe: func() -> pollable;
+		}
+		resource outgoing-response {
+			constructor(headers: headers);
+			body: func() -> result<outgoing-body>;
+			headers: func() -> headers;
+			set-status-code: func(status-code: status-code) -> result;
+			status-code: func() -> status-code;
+		}
+		resource outgoing-body {
+			write: func() -> result<output-stream>;
+			finish: static func(this: outgoing-body, trailers: option<trailers>) -> result<_, error-code>;
+		}
+		resource future-incoming-response {
+			get: func() -> option<result<result<incoming-response, error-code>>>;
+			subscribe: func() -> pollable;
+		}
+		http-error-code: func(err: borrow<io-error>) -> option<error-code>;
+	}
+
+	interface outgoing-handler {
+		use types.{outgoing-request};
+		use types.{request-options};
+		use types.{future-incoming-response};
+		use types.{error-code};
+		handle: func(request: outgoing-request, options: option<request-options>) -> result<future-incoming-response, error-code>;
+	}
+}
+
+package wasi:logging@0.1.0-draft {
+	interface logging {
+		enum level {
+			trace,
+			debug,
+			info,
+			warn,
+			error,
+			critical
+		}
+		log: func(level: level, context: string, message: string);
+	}
+}
+
+package wasi:random@0.2.0 {
+	interface random {
+		get-random-bytes: func(len: u64) -> list<u8>;
+		get-random-u64: func() -> u64;
+	}
+
+	interface insecure {
+		get-insecure-random-bytes: func(len: u64) -> list<u8>;
+		get-insecure-random-u64: func() -> u64;
+	}
+
+	interface insecure-seed {
+		insecure-seed: func() -> tuple<u64, u64>;
+	}
+}
+
+package wasi:sockets@0.2.0 {
+	interface network {
+		resource network;
+		enum error-code {
+			unknown,
+			access-denied,
+			not-supported,
+			invalid-argument,
+			out-of-memory,
+			timeout,
+			concurrency-conflict,
+			not-in-progress,
+			would-block,
+			invalid-state,
+			new-socket-limit,
+			address-not-bindable,
+			address-in-use,
+			remote-unreachable,
+			connection-refused,
+			connection-reset,
+			connection-aborted,
+			datagram-too-large,
+			name-unresolvable,
+			temporary-resolver-failure,
+			permanent-resolver-failure
+		}
+		enum ip-address-family { ipv4, ipv6 }
+		type ipv4-address = tuple<u8, u8, u8, u8>;
+		type ipv6-address = tuple<u16, u16, u16, u16, u16, u16, u16, u16>;
+		variant ip-address {
+			ipv4(ipv4-address),
+			ipv6(ipv6-address),
+		}
+		record ipv4-socket-address {
+			port: u16,
+			address: ipv4-address,
+		}
+		record ipv6-socket-address {
+			port: u16,
+			flow-info: u32,
+			address: ipv6-address,
+			scope-id: u32,
+		}
+		variant ip-socket-address {
+			ipv4(ipv4-socket-address),
+			ipv6(ipv6-socket-address),
+		}
+	}
+
+	interface instance-network {
+		use network.{network};
+		instance-network: func() -> network;
+	}
+
+	interface udp {
+		use wasi:io/poll@0.2.0.{pollable};
+		use network.{network};
+		use network.{error-code};
+		use network.{ip-socket-address};
+		use network.{ip-address-family};
+		record incoming-datagram {
+			data: list<u8>,
+			remote-address: ip-socket-address,
+		}
+		record outgoing-datagram {
+			data: list<u8>,
+			remote-address: option<ip-socket-address>,
+		}
+		resource udp-socket {
+			address-family: func() -> ip-address-family;
+			finish-bind: func() -> result<_, error-code>;
+			local-address: func() -> result<ip-socket-address, error-code>;
+			receive-buffer-size: func() -> result<u64, error-code>;
+			remote-address: func() -> result<ip-socket-address, error-code>;
+			send-buffer-size: func() -> result<u64, error-code>;
+			set-receive-buffer-size: func(value: u64) -> result<_, error-code>;
+			set-send-buffer-size: func(value: u64) -> result<_, error-code>;
+			set-unicast-hop-limit: func(value: u8) -> result<_, error-code>;
+			start-bind: func(network: borrow<network>, local-address: ip-socket-address) -> result<_, error-code>;
+			%stream: func(remote-address: option<ip-socket-address>) -> result<tuple<incoming-datagram-stream, outgoing-datagram-stream>, error-code>;
+			subscribe: func() -> pollable;
+			unicast-hop-limit: func() -> result<u8, error-code>;
+		}
+		resource incoming-datagram-stream {
+			receive: func(max-results: u64) -> result<list<incoming-datagram>, error-code>;
+			subscribe: func() -> pollable;
+		}
+		resource outgoing-datagram-stream {
+			check-send: func() -> result<u64, error-code>;
+			send: func(datagrams: list<outgoing-datagram>) -> result<u64, error-code>;
+			subscribe: func() -> pollable;
+		}
+	}
+
+	interface udp-create-socket {
+		use network.{network};
+		use network.{error-code};
+		use network.{ip-address-family};
+		use udp.{udp-socket};
+		create-udp-socket: func(address-family: ip-address-family) -> result<udp-socket, error-code>;
+	}
+
+	interface tcp {
+		use wasi:io/streams@0.2.0.{input-stream};
+		use wasi:io/streams@0.2.0.{output-stream};
+		use wasi:io/poll@0.2.0.{pollable};
+		use wasi:clocks/monotonic-clock@0.2.0.{duration};
+		use network.{network};
+		use network.{error-code};
+		use network.{ip-socket-address};
+		use network.{ip-address-family};
+		enum shutdown-type { receive, send, both }
+		resource tcp-socket {
+			accept: func() -> result<tuple<tcp-socket, input-stream, output-stream>, error-code>;
+			address-family: func() -> ip-address-family;
+			finish-bind: func() -> result<_, error-code>;
+			finish-connect: func() -> result<tuple<input-stream, output-stream>, error-code>;
+			finish-listen: func() -> result<_, error-code>;
+			hop-limit: func() -> result<u8, error-code>;
+			is-listening: func() -> bool;
+			keep-alive-count: func() -> result<u32, error-code>;
+			keep-alive-enabled: func() -> result<bool, error-code>;
+			keep-alive-idle-time: func() -> result<duration, error-code>;
+			keep-alive-interval: func() -> result<duration, error-code>;
+			local-address: func() -> result<ip-socket-address, error-code>;
+			receive-buffer-size: func() -> result<u64, error-code>;
+			remote-address: func() -> result<ip-socket-address, error-code>;
+			send-buffer-size: func() -> result<u64, error-code>;
+			set-hop-limit: func(value: u8) -> result<_, error-code>;
+			set-keep-alive-count: func(value: u32) -> result<_, error-code>;
+			set-keep-alive-enabled: func(value: bool) -> result<_, error-code>;
+			set-keep-alive-idle-time: func(value: duration) -> result<_, error-code>;
+			set-keep-alive-interval: func(value: duration) -> result<_, error-code>;
+			set-listen-backlog-size: func(value: u64) -> result<_, error-code>;
+			set-receive-buffer-size: func(value: u64) -> result<_, error-code>;
+			set-send-buffer-size: func(value: u64) -> result<_, error-code>;
+			shutdown: func(shutdown-type: shutdown-type) -> result<_, error-code>;
+			start-bind: func(network: borrow<network>, local-address: ip-socket-address) -> result<_, error-code>;
+			start-connect: func(network: borrow<network>, remote-address: ip-socket-address) -> result<_, error-code>;
+			start-listen: func() -> result<_, error-code>;
+			subscribe: func() -> pollable;
+		}
+	}
+
+	interface tcp-create-socket {
+		use network.{network};
+		use network.{error-code};
+		use network.{ip-address-family};
+		use tcp.{tcp-socket};
+		create-tcp-socket: func(address-family: ip-address-family) -> result<tcp-socket, error-code>;
+	}
+
+	interface ip-name-lookup {
+		use wasi:io/poll@0.2.0.{pollable};
+		use network.{network};
+		use network.{error-code};
+		use network.{ip-address};
+		resource resolve-address-stream {
+			resolve-next-address: func() -> result<option<ip-address>, error-code>;
+			subscribe: func() -> pollable;
+		}
+		resolve-addresses: func(network: borrow<network>, name: string) -> result<resolve-address-stream, error-code>;
+	}
+}
+
+package wasi:clocks@0.2.0 {
+	interface monotonic-clock {
+		use wasi:io/poll@0.2.0.{pollable};
+		type instant = u64;
+		type duration = u64;
+		now: func() -> instant;
+		resolution: func() -> duration;
+		subscribe-instant: func(when: instant) -> pollable;
+		subscribe-duration: func(when: duration) -> pollable;
+	}
+
+	interface wall-clock {
+		record datetime {
+			seconds: u64,
+			nanoseconds: u32,
+		}
+		now: func() -> datetime;
+		resolution: func() -> datetime;
+	}
+}
+
+package wasi:io@0.2.0 {
+	interface poll {
+		resource pollable {
+			block: func();
+			ready: func() -> bool;
+		}
+		poll: func(in: list<borrow<pollable>>) -> list<u32>;
+	}
+
+	interface error {
+		resource error {
+			to-debug-string: func() -> string;
+		}
+	}
+
+	interface streams {
+		use error.{error};
+		use poll.{pollable};
+		variant stream-error {
+			last-operation-failed(error),
+			closed,
+		}
+		resource input-stream {
+			blocking-read: func(len: u64) -> result<list<u8>, stream-error>;
+			blocking-skip: func(len: u64) -> result<u64, stream-error>;
+			read: func(len: u64) -> result<list<u8>, stream-error>;
+			skip: func(len: u64) -> result<u64, stream-error>;
+			subscribe: func() -> pollable;
+		}
+		resource output-stream {
+			blocking-flush: func() -> result<_, stream-error>;
+			blocking-splice: func(src: borrow<input-stream>, len: u64) -> result<u64, stream-error>;
+			blocking-write-and-flush: func(contents: list<u8>) -> result<_, stream-error>;
+			blocking-write-zeroes-and-flush: func(len: u64) -> result<_, stream-error>;
+			check-write: func() -> result<u64, stream-error>;
+			flush: func() -> result<_, stream-error>;
+			splice: func(src: borrow<input-stream>, len: u64) -> result<u64, stream-error>;
+			subscribe: func() -> pollable;
+			write: func(contents: list<u8>) -> result<_, stream-error>;
+			write-zeroes: func(len: u64) -> result<_, stream-error>;
+		}
+	}
+}
+
+package wasmcloud:bus@1.0.0 {
+	interface lattice {
+		resource call-target-interface {
+			constructor(namespace: string, %package: string, %interface: string);
+		}
+		set-link-name: func(name: string, interfaces: list<call-target-interface>);
+	}
+}
+
+package wasmcloud:secrets@0.1.0-draft {
+	interface store {
+		variant secrets-error {
+			upstream(string),
+			io(string),
+			not-found,
+		}
+		variant secret-value {
+			%string(string),
+			bytes(list<u8>),
+		}
+		resource secret;
+		get: func(key: string) -> result<secret, secrets-error>;
+	}
+
+	interface reveal {
+		use store.{secret};
+		use store.{secret-value};
+		reveal: func(s: borrow<secret>) -> secret-value;
+	}
+}
