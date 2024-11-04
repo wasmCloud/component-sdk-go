@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/bytecodealliance/wasm-tools-go v0.3.1
 	github.com/stretchr/testify v1.9.0
-	go.wasmcloud.dev/component v0.0.3
+	go.wasmcloud.dev/component v0.0.4
 	go.wasmcloud.dev/wadge v0.7.0
 )
 

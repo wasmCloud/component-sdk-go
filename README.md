@@ -13,14 +13,14 @@ Requires tinygo 0.33 or above.
 Import `go.wasmcloud.dev/component` in your Go module.
 
 ```bash
-go get go.wasmcloud.dev/component@v0.0.3
+go get go.wasmcloud.dev/component@v0.0.4
 ```
 
 Import the SDK WIT. In `wit/deps.toml`:
 
 ```toml
 
-wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/v0.0.3.tar.gz"
+wasmcloud-component = "https://github.com/wasmCloud/component-sdk-go/archive/v0.0.4.tar.gz"
 
 ```
 
