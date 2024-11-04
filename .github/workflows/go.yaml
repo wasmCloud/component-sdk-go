@@ -56,6 +56,9 @@ jobs:
           - http-server
           - http-client
           - invoke
+        tinygo-version:
+          - "0.33.0"
+          - "0.34.0"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +67,7 @@ jobs:
           go-version-file: "_examples/${{ matrix.example }}/go.mod"
       - uses: acifani/setup-tinygo@v2
         with:
-          tinygo-version: ${{ env.TINYGO_VERSION }}
+          tinygo-version: ${{ matrix.tinygo-version }}
       - uses: golangci/golangci-lint-action@v6
         with:
           version: ${{ env.GOLANGCI_VERSION }}
@@ -89,4 +92,3 @@ jobs:
       - name: wash build
         working-directory: "_examples/${{ matrix.example }}"
         run: wash build
-
