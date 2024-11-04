@@ -1,5 +1,5 @@
-github.com/bytecodealliance/wasm-tools-go v0.3.0 h1:9aeDFYpbi3gtIW/nJCH+P+LhFMqezGoOfzqbUZLadho=
-github.com/bytecodealliance/wasm-tools-go v0.3.0/go.mod h1:VY+9FlpLi6jnhCrZLkyJjF9rjU4aEekgaRTk28MS2JE=
+github.com/bytecodealliance/wasm-tools-go v0.3.1 h1:9Q9PjSzkbiVmkUvZ7nYCfJ02mcQDBalxycA3s8g7kR4=
+github.com/bytecodealliance/wasm-tools-go v0.3.1/go.mod h1:vNAQ8DAEp6xvvk+TUHah5DslLEa76f4H6e737OeaxuY=
 github.com/coreos/go-semver v0.3.1 h1:yi21YpKnrx1gt5R+la8n5WgS0kCrsPp33dmEyHReZr4=
 github.com/coreos/go-semver v0.3.1/go.mod h1:irMmmIw/7yzSRPWryHsK7EYSg09caPQL03VsM8rvUec=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -31,10 +31,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/ulikunitz/xz v0.5.12 h1:37Nm15o69RwBkXM0J6A5OlE67RZTfzUxTj8fB3dfcsc=
 github.com/ulikunitz/xz v0.5.12/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
-github.com/urfave/cli/v3 v3.0.0-alpha9 h1:P0RMy5fQm1AslQS+XCmy9UknDXctOmG/q/FZkUFnJSo=
-github.com/urfave/cli/v3 v3.0.0-alpha9/go.mod h1:0kK/RUFHyh+yIKSfWxwheGndfnrvYSmYFVeKCh03ZUc=
-github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 h1:gEOO8jv9F4OT7lGCjxCBTO/36wtF6j2nSip77qHd4x4=
-github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1/go.mod h1:Ohn+xnUBiLI6FVj/9LpzZWtj1/D6lUovWYBkxHVV3aM=
+github.com/urfave/cli/v3 v3.0.0-alpha9.2 h1:CL8llQj3dGRLVQQzHxS+ZYRLanOuhyK1fXgLKD+qV+Y=
+github.com/urfave/cli/v3 v3.0.0-alpha9.2/go.mod h1:FnIeEMYu+ko8zP1F9Ypr3xkZMIDqW3DR92yUtY39q1Y=
 go.wasmcloud.dev/wadge v0.7.0 h1:eUt0jODh6xQ5HEof1PFSgDp+evrNs+lD1LYCYeRR2Cg=
 go.wasmcloud.dev/wadge v0.7.0/go.mod h1:SMnPSWZFTkXyUX0GJ11mcdc7ZoMITtbAlPLlpvGJd4M=
 golang.org/x/mod v0.21.0 h1:vvrHzRwRfVKSiLrG+d4FMl/Qi4ukBCE6kZlTUkDYRT0=
