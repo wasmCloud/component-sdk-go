@@ -4,8 +4,8 @@
 package stderr
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasi/io/streams"
+	"go.bytecodealliance.org/cm"
 )
 
 // OutputStream represents the imported type alias "wasi:cli/stderr@0.2.0#output-stream".

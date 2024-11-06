@@ -3,20 +3,21 @@ module github.com/wasmCloud/component-sdk-go/_examples/http-server
 go 1.23.0
 
 require (
-	github.com/bytecodealliance/wasm-tools-go v0.3.1
 	github.com/stretchr/testify v1.9.0
+	go.bytecodealliance.org v0.4.0
 	go.wasmcloud.dev/component v0.0.4
 	go.wasmcloud.dev/wadge v0.7.0
 )
 
 require (
+	github.com/bytecodealliance/wasm-tools-go v0.3.0 // indirect
 	github.com/coreos/go-semver v0.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/regclient/regclient v0.7.1 // indirect
+	github.com/regclient/regclient v0.7.2 // indirect
 	github.com/samber/lo v1.47.0 // indirect
 	github.com/samber/slog-common v0.17.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

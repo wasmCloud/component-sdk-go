@@ -1,4 +1,4 @@
-//go:generate go run github.com/bytecodealliance/wasm-tools-go/cmd/wit-bindgen-go generate --world example --out gen ./wit
+//go:generate go run go.bytecodealliance.org/cmd/wit-bindgen-go generate --world example --out gen ./wit
 
 package main
 

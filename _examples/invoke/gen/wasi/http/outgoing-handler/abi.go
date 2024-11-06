@@ -3,8 +3,8 @@
 package outgoinghandler
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/invoke/gen/wasi/http/types"
+	"go.bytecodealliance.org/cm"
 	"unsafe"
 )
 

@@ -4,11 +4,11 @@
 package tcp
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	monotonicclock "github.com/wasmCloud/component-sdk-go/_examples/invoke/gen/wasi/clocks/monotonic-clock"
 	"github.com/wasmCloud/component-sdk-go/_examples/invoke/gen/wasi/io/poll"
 	"github.com/wasmCloud/component-sdk-go/_examples/invoke/gen/wasi/io/streams"
 	"github.com/wasmCloud/component-sdk-go/_examples/invoke/gen/wasi/sockets/network"
+	"go.bytecodealliance.org/cm"
 )
 
 // InputStream represents the imported type alias "wasi:sockets/tcp@0.2.0#input-stream".

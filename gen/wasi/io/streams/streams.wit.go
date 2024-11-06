@@ -4,7 +4,7 @@
 package streams
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
+	"go.bytecodealliance.org/cm"
 	ioerror "go.wasmcloud.dev/component/gen/wasi/io/error"
 	"go.wasmcloud.dev/component/gen/wasi/io/poll"
 )
