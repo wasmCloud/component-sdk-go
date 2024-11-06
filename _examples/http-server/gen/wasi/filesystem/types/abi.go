@@ -3,8 +3,8 @@
 package types
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	wallclock "github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/clocks/wall-clock"
+	"go.bytecodealliance.org/cm"
 	"unsafe"
 )
 

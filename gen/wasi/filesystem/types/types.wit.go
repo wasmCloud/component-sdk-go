@@ -4,7 +4,7 @@
 package types
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
+	"go.bytecodealliance.org/cm"
 	wallclock "go.wasmcloud.dev/component/gen/wasi/clocks/wall-clock"
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"
 )

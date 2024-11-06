@@ -3,8 +3,8 @@
 package tcp
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-server/gen/wasi/sockets/network"
+	"go.bytecodealliance.org/cm"
 	"unsafe"
 )
 

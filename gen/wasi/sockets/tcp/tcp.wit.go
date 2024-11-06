@@ -4,7 +4,7 @@
 package tcp
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
+	"go.bytecodealliance.org/cm"
 	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	"go.wasmcloud.dev/component/gen/wasi/io/poll"
 	"go.wasmcloud.dev/component/gen/wasi/io/streams"

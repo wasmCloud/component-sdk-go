@@ -4,9 +4,9 @@
 package udpcreatesocket
 
 import (
-	"github.com/bytecodealliance/wasm-tools-go/cm"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasi/sockets/network"
 	"github.com/wasmCloud/component-sdk-go/_examples/http-client/gen/wasi/sockets/udp"
+	"go.bytecodealliance.org/cm"
 )
 
 // Network represents the imported type alias "wasi:sockets/udp-create-socket@0.2.0#network".

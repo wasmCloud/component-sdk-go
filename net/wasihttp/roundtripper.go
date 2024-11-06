@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bytecodealliance/wasm-tools-go/cm"
+	"go.bytecodealliance.org/cm"
 	monotonicclock "go.wasmcloud.dev/component/gen/wasi/clocks/monotonic-clock"
 	outgoinghandler "go.wasmcloud.dev/component/gen/wasi/http/outgoing-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/bytecodealliance/wasm-tools-go/cm"
+	"go.bytecodealliance.org/cm"
 	incominghandler "go.wasmcloud.dev/component/gen/wasi/http/incoming-handler"
 	"go.wasmcloud.dev/component/gen/wasi/http/types"
 )
