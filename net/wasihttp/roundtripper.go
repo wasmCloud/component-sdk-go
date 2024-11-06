@@ -92,14 +92,23 @@ func (r *Transport) RoundTrip(incomingRequest *http.Request) (*http.Response, er
 			return nil, fmt.Errorf("failed to copy body: %v", err)
 		}
 
+		if err := adaptedBody.Close(); err != nil {
+			return nil, fmt.Errorf("failed to close body: %v", err)
+		}
+
 		outTrailers := types.NewFields()
 		if err := HTTPtoWASIHeader(incomingRequest.Trailer, outTrailers); err != nil {
 			return nil, err
 		}
 
-		outFinish := types.OutgoingBodyFinish(*body, cm.Some(outTrailers))
+		maybeTrailers := cm.None[types.Fields]()
+		if len(incomingRequest.Trailer) > 0 {
+			maybeTrailers = cm.Some(outTrailers)
+		}
+
+		outFinish := types.OutgoingBodyFinish(*body, maybeTrailers)
 		if outFinish.IsErr() {
-			return nil, fmt.Errorf("failed to set trailer: %v", outFinish.Err())
+			return nil, fmt.Errorf("failed to finish body: %v", outFinish.Err())
 		}
 	}
 
