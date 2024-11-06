@@ -23,34 +23,36 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "tarball=wit-${version}.tar.gz" >> "$GITHUB_OUTPUT"
           echo "version is ${version}"
-    - uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c
+    - uses: taiki-e/install-action@959f8ad90499c9ce5d072830b8ca80b6edd1d13f
       with:
-        tool: wkg@0.7.4
-    - name: Generate and set wkg config
+        tool: wash-cli@0.36.1
+    - name: Generate and set config
       shell: bash
       env:
-        WKG_OCI_USERNAME: ${{ github.repository_owner }}
-        WKG_OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        OCI_USERNAME: ${{ github.repository_owner }}
+        OCI_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cat << EOF > wkg-config.toml
+        cat << EOF > package_config.toml
         [namespace_registries]
         wasmcloud = "wasmcloud.com"
         wrpc = "bytecodealliance.org"
         wasi = "wasi.dev"
 
         [registry."wasmcloud.com".oci]
-        auth = { username = "${WKG_OCI_USERNAME}", password = "${WKG_OCI_PASSWORD}" }
+        auth = { username = "${OCI_USERNAME}", password = "${OCI_PASSWORD}" }
         EOF
-        echo "WKG_CONFIG_FILE=$(realpath wkg-config.toml)" >> $GITHUB_ENV
+        echo "WASH_PACKAGE_CONFIG_FILE=$(realpath package_config.toml)" >> $GITHUB_ENV
     - name: Build
-      run: wkg wit build -o package.wasm
+      run: |
+        wash wit build -f package.wasm
     - name: Push version-tagged WebAssembly binary to GHCR
-      run: wkg publish package.wasm
+      run: |
+        wash wit publish package.wasm
     - name: Package tarball for release
       run: |
-          tar -cvzf ${{ steps.ctx.outputs.tarball }} wit
+        tar -cvzf ${{ steps.ctx.outputs.tarball }} wit
     - name: Release
       uses: softprops/action-gh-release@e7a8f85e1c67a31e6ed99a94b41bd0b71bbee6b8
       with:
-          files: ${{ steps.ctx.outputs.tarball }}
-          make_latest: "false"
+        files: ${{ steps.ctx.outputs.tarball }}
+        make_latest: "false"
