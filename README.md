@@ -45,34 +45,42 @@ The `wasihttp` package provides an implementation of `http.Handler` backed by `w
 `wasihttp.Handle` registers an `http.Handler` to be served at a given path, converting `wasi:http` requests/responses into standard `http.Request` and `http.ResponseWriter` objects.
 
 ```go
+package main
+
 import (
-  "net/http"
-  "go.wasmcloud.dev/component/net/wasihttp"
+	"net/http"
+	"go.wasmcloud.dev/component/net/wasihttp"
 )
 
-func httpServe(w http.ResponseWriter, *r http.Request) {
-  w.Write([]byte("Hello, world!"))
+func httpServe(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Hello, world!"))
 }
 
 func init() {
-// request will be fulfilled via wasi:http/incoming-handler
-  wasihttp.HandleFunc("/", httpServe)
+	// request will be fulfilled via wasi:http/incoming-handler
+	wasihttp.HandleFunc(httpServe)
 }
 ```
 
 ### http.RoundTripper
 
 ```go
+package main
+
 import (
-  "net/http"
-  "go.wasmcloud.dev/component/net/wasihttp"
+	"net/http"
+	"go.wasmcloud.dev/component/net/wasihttp"
 )
 
-var wasiTransport = &wasihttp.Transport{}
-var httpClient = &http.Client{Transport: wasiTransport}
+var (
+	wasiTransport = &wasihttp.Transport{}
+	httpClient    = &http.Client{Transport: wasiTransport}
+)
 
-// request will be fulfilled via wasi:http/outgoing-handler
-httpClient.Get("http://example.com")
+func httpClient() {
+	// request will be fulfilled via wasi:http/outgoing-handler
+	httpClient.Get("http://example.com")
+}
 ```
 
 ## log/wasilog
@@ -82,16 +90,20 @@ The `wasilog` package provides an implementation of `slog.Handler` backed by `wa
 Sample usage:
 
 ```go
+package main
+
 import (
-  "log/slog"
-  "go.wasmcloud.dev/component/log/wasilog"
+	"log/slog"
+	"go.wasmcloud.dev/component/log/wasilog"
 )
 
-logger := slog.New(wasilog.DefaultOptions().NewHandler())
+func wasilog() {
+	logger := slog.New(wasilog.DefaultOptions().NewHandler())
 
-logger.Info("Hello")
-logger.Info("Hello", "planet", "Earth")
-logger.Info("Hello", slog.String("planet", "Earth"))
+	logger.Info("Hello")
+	logger.Info("Hello", "planet", "Earth")
+	logger.Info("Hello", slog.String("planet", "Earth"))
+}
 ```
 
 See `wasilog.Options` for log level & other configuration options.
