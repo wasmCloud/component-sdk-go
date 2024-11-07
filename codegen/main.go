@@ -11,20 +11,9 @@ import (
 )
 
 func main() {
-	err := Command.Run(context.Background(), os.Args)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-var Command = &cli.Command{
-	Name:  "wit-bindgen-go",
-	Usage: "codegen helper",
-	Commands: []*cli.Command{
-		generate.Command,
-	},
-	Flags: []cli.Flag{
+	cmd := generate.Command
+	cmd.Name = "component-sdk-go-codegen"
+	cmd.Flags = append(cmd.Flags,
 		&cli.BoolFlag{
 			Name:    "verbose",
 			Aliases: []string{"v"},
@@ -35,8 +24,11 @@ var Command = &cli.Command{
 			Aliases: []string{"vv"},
 			Usage:   "print debug logging messages",
 		},
-	},
-	Action: func(ctx context.Context, cmd *cli.Command) error {
-		return cli.ShowAppHelp(cmd)
-	},
+	)
+
+	err := cmd.Run(context.Background(), os.Args)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 }

@@ -3,5 +3,5 @@
 package main
 
 import (
-	_ "go.wasmcloud.dev/component/wit-bindgen-go"
+	_ "go.wasmcloud.dev/component/codegen"
 )

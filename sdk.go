@@ -1,3 +1,3 @@
 package component
 
-//go:generate go run go.wasmcloud.dev/component/wit-bindgen-go generate --world sdk --out gen ./wit
+//go:generate go run go.wasmcloud.dev/component/codegen --world sdk --out gen ./wit

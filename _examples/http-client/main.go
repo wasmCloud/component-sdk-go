@@ -1,6 +1,6 @@
 package main
 
-//go:generate go run go.wasmcloud.dev/component/wit-bindgen-go generate --world example --out gen ./wit
+//go:generate go run go.wasmcloud.dev/component/codegen --world example --out gen ./wit
 
 import (
 	"io"
