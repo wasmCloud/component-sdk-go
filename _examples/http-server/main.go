@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"sort"
@@ -13,39 +14,30 @@ import (
 )
 
 const Index = `/error - return a 500 error
-  /form - echo the fields of a POST request
-  /headers - echo your user agent back as a server side header
-  /post - echo the body of a POST request`
+/form - echo the fields of a POST request
+/headers - echo your user agent back as a server side header
+/post - echo the body of a POST request`
 
 func init() {
-	// We can't use http.ServeMux yet ( only symbol linking is supported in 'init' )
-	wasihttp.HandleFunc(entryHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/error", errorHandler)
+	mux.HandleFunc("/form", formHandler)
+	mux.HandleFunc("/headers", headersHandler)
+	mux.HandleFunc("/post", postHandler)
+	wasihttp.Handle(mux)
 }
 
-func entryHandler(w http.ResponseWriter, r *http.Request) {
-	logger := wasilog.ContextLogger("entryHandler")
-	handlers := map[string]http.HandlerFunc{
-		"/error":   errorHandler,
-		"/form":    formHandler,
-		"/headers": headersHandler,
-		"/post":    postHandler,
-	}
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	logger := wasilog.ContextLogger("indexHandler")
 
 	logger.Info("Request received", "host", r.Host, "path", r.URL.Path, "agent", r.Header.Get("User-Agent"))
 
-	if handler, ok := handlers[r.URL.Path]; ok {
-		handler(w, r)
-		return
-	}
-
-	var keys []string
-	for k := range handlers {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	handlers := []string{"/error", "/form", "/headers", "/post"}
+	sort.Strings(handlers)
 	w.Header().Add("content-type", "text/plain")
 	w.Header().Add("X-Requested-Path", r.URL.Path)
-	w.Header().Add("X-Existing-Paths", strings.Join(keys, ","))
+	w.Header().Add("X-Existing-Paths", strings.Join(handlers, ","))
 	_, _ = w.Write([]byte(Index))
 }
 
@@ -60,6 +52,11 @@ func errorHandler(w http.ResponseWriter, _ *http.Request) {
 }
 
 func formHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, fmt.Sprintf("Request method %s did not match POST", r.Method), http.StatusBadRequest)
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -71,6 +68,11 @@ func formHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, fmt.Sprintf("Request method %s did not match POST", r.Method), http.StatusBadRequest)
+		return
+	}
+
 	logger := wasilog.ContextLogger("postHandler")
 
 	w.WriteHeader(http.StatusOK)
