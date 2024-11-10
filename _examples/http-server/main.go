@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/julienschmidt/httprouter"
 	"go.wasmcloud.dev/component/log/wasilog"
 	"go.wasmcloud.dev/component/net/wasihttp"
 )
@@ -18,34 +19,24 @@ const Index = `/error - return a 500 error
   /post - echo the body of a POST request`
 
 func init() {
-	// We can't use http.ServeMux yet ( only symbol linking is supported in 'init' )
-	wasihttp.HandleFunc(entryHandler)
+	router := httprouter.New()
+	router.HandlerFunc(http.MethodGet, "/", indexHandler)
+	router.HandlerFunc(http.MethodGet, "/error", errorHandler)
+	router.HandlerFunc(http.MethodGet, "/headers", headersHandler)
+	router.HandlerFunc(http.MethodPost, "/form", formHandler)
+	router.HandlerFunc(http.MethodPost, "/post", postHandler)
+	wasihttp.Handle(router)
 }
 
-func entryHandler(w http.ResponseWriter, r *http.Request) {
-	logger := wasilog.ContextLogger("entryHandler")
-	handlers := map[string]http.HandlerFunc{
-		"/error":   errorHandler,
-		"/form":    formHandler,
-		"/headers": headersHandler,
-		"/post":    postHandler,
-	}
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	logger := wasilog.ContextLogger("indexHandler")
+	logger.Info("Request received", "host", r.Host, "agent", r.Header.Get("User-Agent"))
 
-	logger.Info("Request received", "host", r.Host, "path", r.URL.Path, "agent", r.Header.Get("User-Agent"))
-
-	if handler, ok := handlers[r.URL.Path]; ok {
-		handler(w, r)
-		return
-	}
-
-	var keys []string
-	for k := range handlers {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	handlers := []string{"/error", "/form", "/headers", "/post"}
+	sort.Strings(handlers)
 	w.Header().Add("content-type", "text/plain")
 	w.Header().Add("X-Requested-Path", r.URL.Path)
-	w.Header().Add("X-Existing-Paths", strings.Join(keys, ","))
+	w.Header().Add("X-Existing-Paths", strings.Join(handlers, ","))
 	_, _ = w.Write([]byte(Index))
 }
 
