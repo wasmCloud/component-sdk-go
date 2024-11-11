@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	go.bytecodealliance.org v0.4.0
-	go.wasmcloud.dev/component v0.0.4
+	go.wasmcloud.dev/component v0.0.5
 )
 
 require (
