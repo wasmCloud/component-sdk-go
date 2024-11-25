@@ -23,7 +23,7 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "tarball=wit-${version}.tar.gz" >> "$GITHUB_OUTPUT"
           echo "version is ${version}"
-    - uses: taiki-e/install-action@5d427d86f088a6cedcddb92b3ad038d30721b52f
+    - uses: taiki-e/install-action@6da51af62171044932d435033daa70a0eb3383ba
       with:
         tool: wash-cli@0.36.1
     - name: Generate and set config
