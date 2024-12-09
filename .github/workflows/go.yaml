@@ -9,6 +9,7 @@ on:
 env:
   TINYGO_VERSION: "0.33.0"
   GOLANGCI_VERSION: "v1.61"
+  WASM_TOOLS_VERSION: "1.220.0"
 
 jobs:
   lint:
@@ -27,7 +28,7 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - name: Tools
         run: |
-          cargo binstall -y wasm-tools
+          cargo binstall -y "wasm-tools@${WASM_TOOLS_VERSION}"
 
       - name: Go generate
         run: |
@@ -88,7 +89,7 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - name: Tools
         run: |
-          cargo binstall -y wasm-tools
+          cargo binstall -y "wasm-tools@${WASM_TOOLS_VERSION}"
           wash --version
 
       - name: Go generate
